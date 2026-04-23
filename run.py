@@ -1,15 +1,14 @@
 """
-SurplusIQ — Master Pipeline Runner
-Run this daily to scrape, enrich, verify, and export leads
+SurplusIQ — Master Pipeline Runner v2
+Uses Excess Elite API instead of Real Foreclosure scraper.
 
 Usage:
   python run.py                    # Full run, all 10 counties
-  python run.py --counties miami-dade-fl broward-fl   # Specific counties
-  python run.py --skip-scrape      # Use today's existing raw data
-  python run.py --skip-enrich      # Skip PropertyRadar (use existing enriched)
+  python run.py --test             # Miami Dade + Cuyahoga only
+  python run.py --skip-fetch       # Use today's existing data
+  python run.py --skip-enrich      # Skip PropertyRadar
   python run.py --skip-clerk       # Skip clerk checks
-  python run.py --test             # Quick test with 2 counties
-  python run.py --headed           # Show browser windows (useful for CAPTCHA)
+  python run.py --stats            # Just show county lead counts
 """
 
 import asyncio
@@ -40,175 +39,186 @@ def banner(text: str):
 
 async def main():
     parser = argparse.ArgumentParser(description="SurplusIQ Daily Pipeline")
-    parser.add_argument("--counties",     nargs="+", help="Specific county IDs to run")
-    parser.add_argument("--skip-scrape",  action="store_true", help="Skip auction scraping")
-    parser.add_argument("--skip-enrich",  action="store_true", help="Skip PropertyRadar enrichment")
-    parser.add_argument("--skip-clerk",   action="store_true", help="Skip clerk docket checks")
-    parser.add_argument("--test",         action="store_true", help="Test mode: 2 counties only")
-    parser.add_argument("--headed",       action="store_true", help="Show browser windows")
-    parser.add_argument("--date",         type=str,            help="Date string YYYY-MM-DD (default: today)")
+    parser.add_argument("--test",        action="store_true", help="Test: Miami Dade + Cuyahoga only")
+    parser.add_argument("--skip-fetch",  action="store_true", help="Skip API fetch, use existing data")
+    parser.add_argument("--skip-enrich", action="store_true", help="Skip PropertyRadar enrichment")
+    parser.add_argument("--skip-clerk",  action="store_true", help="Skip clerk docket checks")
+    parser.add_argument("--stats",       action="store_true", help="Show live county stats only")
+    parser.add_argument("--date",        type=str,            help="Date YYYY-MM-DD (default: today)")
     args = parser.parse_args()
 
-    today     = args.date or date.today().isoformat()
-    headless  = not args.headed
+    today = args.date or date.today().isoformat()
+
+    if args.stats:
+        from fetch_leads import get_stats, COUNTIES
+        print("\n📊 Live county stats from Excess Elite API:")
+        stats = get_stats()
+        total = 0
+        for county in COUNTIES:
+            count = stats.get(county["id"], 0)
+            total += count
+            bar = "█" * (count // 20)
+            print(f"  {county['name']:15} ({county['state']}): {count:>4} leads  {bar}")
+        print(f"\n  Total: {total:,} leads across 10 counties")
+        return
 
     if args.test:
         county_ids = ["miami-dade-fl", "cuyahoga-oh"]
-        print("🧪 TEST MODE: Running Miami-Dade + Cuyahoga only")
+        print("🧪 TEST MODE: Miami Dade + Cuyahoga only")
     else:
-        county_ids = args.counties
+        county_ids = None
 
     banner(f"SurplusIQ Daily Run — {today}")
 
-    # ── STEP 1: Scrape Auction Results ────────────────────────────────
-    raw_properties = []
-
-    if not args.skip_scrape:
-        banner("STEP 1 — Scraping Real Foreclosure")
-        from realforeclose import run_all_counties, load_raw
-        raw_properties = await run_all_counties(county_ids=county_ids, headless=headless)
+    # STEP 1: Fetch from Excess Elite API
+    raw_leads = []
+    if not args.skip_fetch:
+        banner("STEP 1 — Fetching leads from Excess Elite API")
+        from fetch_leads import fetch_all_counties
+        raw_leads = fetch_all_counties(county_ids=county_ids, get_details=False)
     else:
-        banner("STEP 1 — Loading existing raw data (skip-scrape)")
-        from realforeclose import load_raw
-        raw_properties = load_raw(today)
-        print(f"  Loaded {len(raw_properties)} properties from {today}")
+        banner("STEP 1 — Loading existing data (skip-fetch)")
+        from fetch_leads import load_raw
+        raw_leads = load_raw(today)
+        print(f"  Loaded {len(raw_leads)} leads from {today}")
 
-    if not raw_properties:
-        print("⚠️  No raw properties found. Check scraper output.")
+    if not raw_leads:
+        print("No leads found.")
         return
 
-    # ── STEP 2: Filter Third-Party Sales Only ─────────────────────────
-    banner("STEP 2 — Filtering Third-Party Sales")
-    from pipeline import is_third_party_sale, MIN_SURPLUS_THRESHOLD, clean_dollar
-    import re
+    # STEP 2: Score leads
+    banner("STEP 2 — Scoring leads")
+    scored_leads = score_leads(raw_leads)
 
-    third_party_props = []
-    for prop in raw_properties:
-        if is_third_party_sale(prop):
-            # Quick surplus check before enriching
-            final  = float(prop.get("final_sale_price", 0) or 0)
-            opening = float(prop.get("opening_bid", 0) or 0)
-            if final > opening and (final - opening) >= MIN_SURPLUS_THRESHOLD:
-                third_party_props.append(prop)
-
-    print(f"  Total scraped:        {len(raw_properties)}")
-    print(f"  Third-party surplus:  {len(third_party_props)}")
-
-    if not third_party_props:
-        print("⚠️  No third-party surplus properties found today.")
-        # Still build empty output
-        _finalize([], today)
-        return
-
-    # ── STEP 3: PropertyRadar Enrichment ──────────────────────────────
-    enriched_props = []
-
+    # STEP 3: PropertyRadar enrichment (top leads only)
     if not args.skip_enrich:
-        banner("STEP 3 — PropertyRadar Enrichment")
+        banner("STEP 3 — PropertyRadar Enrichment (top 100 leads)")
         try:
-            import re as re_module
-            import sys
-            sys.modules["re"] = re_module
+            import re as re_mod
+            sys.modules.setdefault("re", re_mod)
             from enrichment import enrich_batch, save_enriched
-            enriched_props = enrich_batch(third_party_props, delay=0.6)
-            save_enriched(enriched_props, today)
+            top    = [l for l in scored_leads if l.get("grade") in ("A+", "A")][:100]
+            rest   = [l for l in scored_leads if l not in top]
+            top    = enrich_batch(top, delay=0.6)
+            scored_leads = score_leads(top + rest)
         except Exception as e:
-            print(f"  ⚠ PropertyRadar enrichment failed: {e}")
-            print("  Continuing with un-enriched properties...")
-            enriched_props = third_party_props
+            print(f"  PropertyRadar skipped: {e}")
     else:
-        banner("STEP 3 — Loading existing enriched data (skip-enrich)")
-        from enrichment import load_enriched
-        enriched_props = load_enriched(today)
-        if not enriched_props:
-            print("  No enriched data found, using raw third-party props")
-            enriched_props = third_party_props
-        else:
-            print(f"  Loaded {len(enriched_props)} enriched properties")
+        banner("STEP 3 — Skipping PropertyRadar")
 
-    # ── STEP 4: Surplus Detection & Scoring ───────────────────────────
-    banner("STEP 4 — Surplus Detection & Lead Scoring")
-    from pipeline import run_pipeline, save_leads
-    scored_leads = run_pipeline(enriched_props)
-    save_leads(scored_leads, today)
-
-    # ── STEP 5: Clerk Docket Checks ───────────────────────────────────
-    verified_leads = scored_leads
-
+    # STEP 4: Clerk checks (top A+/A only)
     if not args.skip_clerk:
-        banner("STEP 5 — Clerk Docket Verification")
+        banner("STEP 4 — Clerk Docket Checks")
         try:
-            from clerk import run_clerk_checks, save_verified
-            verified_leads = await run_clerk_checks(scored_leads, headless=headless)
-            save_verified(verified_leads, today)
-
-            # Re-score after clerk check (claim status may have changed)
-            banner("STEP 5b — Re-scoring after clerk verification")
-            from pipeline import run_pipeline
-            verified_leads = run_pipeline(verified_leads)
-            save_leads(verified_leads, today)
-
+            from clerk import run_clerk_checks
+            top  = [l for l in scored_leads if l.get("grade") in ("A+", "A")][:50]
+            rest = [l for l in scored_leads if l not in top]
+            top  = await run_clerk_checks(top, headless=True)
+            scored_leads = score_leads(top + rest)
         except Exception as e:
-            print(f"  ⚠ Clerk checks failed: {e}")
-            print("  Continuing with pre-verification scores...")
+            print(f"  Clerk checks skipped: {e}")
     else:
-        banner("STEP 5 — Skipping clerk checks (skip-clerk)")
+        banner("STEP 4 — Skipping clerk checks")
 
-    # ── STEP 6: Export ────────────────────────────────────────────────
-    banner("STEP 6 — Generating Exports")
-    _finalize(verified_leads, today)
+    # Save
+    out = DATA_DIR / f"leads_{today}.jsonl"
+    with open(out, "w") as f:
+        for l in scored_leads:
+            f.write(json.dumps(l) + "\n")
+    print(f"\n💾 Leads saved: {out}")
 
-    # ── STEP 7: Update Dashboard Data ────────────────────────────────
-    banner("STEP 7 — Updating Dashboard")
-    _update_dashboard(verified_leads, today)
-
-    # ── Done ──────────────────────────────────────────────────────────
-    banner("✅ SurplusIQ Run Complete")
-    a_plus = sum(1 for l in verified_leads if l.get("grade") == "A+")
-    outreach = sum(1 for l in verified_leads if l.get("outreach_ready"))
-    total_surplus = sum(l.get("net_surplus", 0) or 0 for l in verified_leads)
-    print(f"  Total leads:     {len(verified_leads)}")
-    print(f"  A+ leads:        {a_plus}")
-    print(f"  Outreach ready:  {outreach}")
-    print(f"  Total surplus:   ${total_surplus:,.0f}")
-    print(f"\n  📊 Dashboard: dashboard/index.html")
-    print(f"  📋 Excel:     output/SurplusIQ_Leads_{today}.xlsx")
-
-
-def _finalize(leads: list, date_str: str):
-    """Build Excel export."""
+    # Excel
+    banner("STEP 5 — Excel export")
     try:
         from excel_export import build_excel
-        build_excel(leads, date_str)
+        build_excel(scored_leads, today)
     except Exception as e:
-        print(f"  ⚠ Excel export failed: {e}")
+        print(f"  Excel failed: {e}")
+
+    # Dashboard
+    banner("STEP 6 — Dashboard update")
+    update_dashboard(scored_leads, today)
+
+    # Summary
+    banner("✅ Done")
+    a_plus   = sum(1 for l in scored_leads if l.get("grade") == "A+")
+    outreach = sum(1 for l in scored_leads if l.get("outreach_ready"))
+    surplus  = sum(l.get("net_surplus", 0) or 0 for l in scored_leads)
+    print(f"  Total leads:    {len(scored_leads):,}")
+    print(f"  A+ leads:       {a_plus}")
+    print(f"  Outreach ready: {outreach}")
+    print(f"  Total surplus:  ${surplus:,.0f}")
+    print(f"\n  📋 output/SurplusIQ_Leads_{today}.xlsx")
+    print(f"  🌐 dashboard/index.html")
 
 
-def _update_dashboard(leads: list, date_str: str):
-    """Write JSON files for the GitHub Pages dashboard."""
-    dashboard_data_dir = ROOT / "dashboard" / "data"
-    dashboard_data_dir.mkdir(parents=True, exist_ok=True)
+def score_leads(leads: list) -> list:
+    scored = []
+    for lead in leads:
+        surplus      = float(lead.get("surplus_amount") or lead.get("net_surplus") or 0)
+        claim_status = lead.get("claim_status", "unknown")
+        has_liens    = lead.get("has_secondary_liens")
+        doc_avail    = lead.get("doc_available", False)
+        pr_enriched  = lead.get("pr_enriched", False)
 
-    # Summary stats
+        score = 0
+        if surplus >= 100000:  score += 50
+        elif surplus >= 50000: score += 42
+        elif surplus >= 25000: score += 34
+        elif surplus >= 10000: score += 24
+        elif surplus >= 5000:  score += 14
+        elif surplus >= 1000:  score += 6
+
+        if claim_status == "none":       score += 25
+        elif claim_status == "unknown":  score += 18
+        elif claim_status == "partial":  score += 12
+        elif claim_status == "filed":    score += 3
+
+        if has_liens is False:   score += 15
+        elif has_liens is None:  score += 10
+        if doc_avail:            score += 7
+        if pr_enriched:          score += 3
+
+        if score >= 80:    grade = "A+"
+        elif score >= 65:  grade = "A"
+        elif score >= 45:  grade = "B"
+        else:              grade = "C"
+
+        if claim_status == "disbursed": grade = "C"; score = min(score, 10)
+        if surplus < 1000:              grade = "C"; score = min(score, 5)
+
+        lead["score"]         = score
+        lead["grade"]         = grade
+        lead["net_surplus"]   = surplus
+        lead["outreach_ready"] = (
+            grade in ("A+", "A")
+            and claim_status in ("none", "unknown", "partial")
+            and surplus >= 5000
+        )
+        scored.append(lead)
+
+    scored.sort(key=lambda x: (
+        {"A+": 4, "A": 3, "B": 2, "C": 1}.get(x.get("grade", "C"), 0),
+        x.get("net_surplus", 0)
+    ), reverse=True)
+
+    grades = {g: sum(1 for l in scored if l.get("grade") == g) for g in ["A+","A","B","C"]}
+    print(f"  {len(scored)} leads — A+:{grades['A+']} A:{grades['A']} B:{grades['B']} C:{grades['C']}")
+    return scored
+
+
+def update_dashboard(leads: list, date_str: str):
+    dd = ROOT / "dashboard" / "data"
+    dd.mkdir(parents=True, exist_ok=True)
+
     total_surplus = sum(l.get("net_surplus", 0) or 0 for l in leads)
-    grades = {"A+": 0, "A": 0, "B": 0, "C": 0}
-    for l in leads:
-        g = l.get("grade", "C")
-        grades[g] = grades.get(g, 0) + 1
+    grades = {g: sum(1 for l in leads if l.get("grade") == g) for g in ["A+","A","B","C"]}
 
-    # Per-county breakdown
     counties = {}
     for lead in leads:
         cid = lead.get("county_id", "")
         if cid not in counties:
-            counties[cid] = {
-                "id":       cid,
-                "name":     lead.get("county_name", ""),
-                "state":    lead.get("state", ""),
-                "leads":    0,
-                "surplus":  0,
-                "aplus":    0,
-            }
+            counties[cid] = {"id": cid, "name": lead.get("county_name",""), "state": lead.get("state",""), "leads": 0, "surplus": 0, "aplus": 0}
         counties[cid]["leads"]   += 1
         counties[cid]["surplus"] += lead.get("net_surplus", 0) or 0
         if lead.get("grade") == "A+":
@@ -220,47 +230,23 @@ def _update_dashboard(leads: list, date_str: str):
         "total_surplus":  total_surplus,
         "grades":         grades,
         "outreach_ready": sum(1 for l in leads if l.get("outreach_ready")),
-        "docs_ready":     sum(1 for l in leads if l.get("doc_available")),
         "counties":       list(counties.values()),
     }
+    (dd / "summary.json").write_text(json.dumps(summary, indent=2))
 
-    with open(dashboard_data_dir / "summary.json", "w") as f:
-        json.dump(summary, f, indent=2)
-
-    # Lead data (sanitized for dashboard — no raw docket text)
-    dashboard_leads = []
-    for lead in leads:
-        dashboard_leads.append({
-            "grade":           lead.get("grade"),
-            "score":           lead.get("score"),
-            "county_name":     lead.get("county_name"),
-            "state":           lead.get("state"),
-            "address":         lead.get("address"),
-            "owner_name":      lead.get("owner_name"),
-            "case_number":     lead.get("case_number"),
-            "sale_date":       lead.get("sale_date"),
-            "final_sale_price": lead.get("final_sale_price"),
-            "opening_bid":     lead.get("opening_bid"),
-            "net_surplus":     lead.get("net_surplus"),
-            "gross_surplus":   lead.get("gross_surplus"),
-            "claim_status":    lead.get("claim_status"),
-            "partial_claim":   lead.get("partial_claim"),
-            "doc_status":      lead.get("doc_status"),
-            "doc_available":   lead.get("doc_available"),
-            "has_secondary_liens": lead.get("has_secondary_liens"),
-            "lien_flags_str":  lead.get("lien_flags_str"),
-            "winner_name":     lead.get("winner_name"),
-            "outreach_ready":  lead.get("outreach_ready"),
-            "next_check":      lead.get("next_check"),
-            "pr_enriched":     lead.get("pr_enriched"),
-            "lead_type":       lead.get("lead_type", "Mortgage Foreclosure"),
-        })
-
-    with open(dashboard_data_dir / "leads.json", "w") as f:
-        json.dump(dashboard_leads, f, indent=2)
-
-    print(f"  ✅ Dashboard data written to dashboard/data/")
-    print(f"     summary.json — {len(leads)} leads, ${total_surplus:,.0f} total surplus")
+    dash = [{
+        "grade": l.get("grade"), "score": l.get("score"),
+        "county_name": l.get("county_name"), "state": l.get("state"),
+        "address": l.get("address"), "owner_name": l.get("owner_name"),
+        "case_number": l.get("case_number"), "parcel_id": l.get("parcel_id"),
+        "sale_date": l.get("sale_date"), "final_sale_price": l.get("final_sale_price"),
+        "opening_bid": l.get("opening_bid"), "net_surplus": l.get("net_surplus"),
+        "surplus_amount": l.get("surplus_amount"), "lead_type": l.get("lead_type"),
+        "claim_status": l.get("claim_status"), "doc_available": l.get("doc_available"),
+        "outreach_ready": l.get("outreach_ready"), "source": l.get("source"),
+    } for l in leads]
+    (dd / "leads.json").write_text(json.dumps(dash, indent=2))
+    print(f"  ✅ Dashboard updated — {len(leads)} leads, ${total_surplus:,.0f} surplus")
 
 
 if __name__ == "__main__":

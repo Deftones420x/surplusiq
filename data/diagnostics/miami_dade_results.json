@@ -1,0 +1,180 @@
+{
+  "page1_url": "https://miami-dade.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW",
+  "day_ids": [],
+  "links": [
+    {
+      "text": "Home",
+      "href": "/index.cfm"
+    },
+    {
+      "text": "About Us",
+      "href": "/index.cfm?zaction=home&zmethod=aboutus"
+    },
+    {
+      "text": "FAQ",
+      "href": "/index.cfm?zaction=home&zmethod=faq"
+    },
+    {
+      "text": "Contact Us",
+      "href": "/index.cfm?zaction=ContactUS&zmethod=START"
+    },
+    {
+      "text": "Forgot your username?",
+      "href": "/index.cfm?zaction=HOME&Zmethod=FORGOTUN"
+    },
+    {
+      "text": "Forgot your password?",
+      "href": "/index.cfm?zaction=HOME&Zmethod=FORGOT"
+    },
+    {
+      "text": "Training",
+      "href": "/index.cfm?ZACTION=HOME&ZMETHOD=TRAINING"
+    },
+    {
+      "text": "Foreclosure Process",
+      "href": "/index.cfm?ZACTION=HOME&ZMETHOD=FORECLOSE"
+    },
+    {
+      "text": "Tax Deed Sale Process",
+      "href": "/index.cfm?ZACTION=HOME&ZMETHOD=TAXDEED"
+    },
+    {
+      "text": "Clerk Of Courts",
+      "href": "http://www.miami-dadeclerk.com"
+    },
+    {
+      "text": "Property Appraiser",
+      "href": "http://www.miamidade.gov/pa/"
+    },
+    {
+      "text": "Tax Collector",
+      "href": "http://www.miamidade.gov/taxcollector/"
+    },
+    {
+      "text": "myFlorida.gov",
+      "href": "https://www.myflorida.gov"
+    },
+    {
+      "text": "AO 2013-05",
+      "href": "/CORE/Public/documents/V15_AO%202013-05.pdf"
+    },
+    {
+      "text": "< < Previous Auction",
+      "href": "/index.cfm?zaction=AUCTION&zmethod=PREVIEW&AuctionDate=04/22/2026"
+    },
+    {
+      "text": "Next Auction > >",
+      "href": "/index.cfm?zaction=AUCTION&zmethod=PREVIEW&AuctionDate=04/27/2026"
+    },
+    {
+      "text": "Current",
+      "href": "/index.cfm?zaction=AUCTION&zmethod=PREVIEW&AuctionDate=04/23/2026"
+    },
+    {
+      "text": "30-7829-000-0160",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3078290000160"
+    },
+    {
+      "text": "23-3209-026-0280",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=2332090260280"
+    },
+    {
+      "text": "30-4834-000-0010",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3048340000010"
+    },
+    {
+      "text": "35-3008-017-0010",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3530080170010"
+    },
+    {
+      "text": "30-5007-063-2700",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3050070632700"
+    },
+    {
+      "text": "30-3115-007-0121",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3031150070121"
+    },
+    {
+      "text": "30-6018-026-2040",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3060180262040"
+    },
+    {
+      "text": "30-4029-034-0020",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3040290340020"
+    },
+    {
+      "text": "30-4927-056-1250",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3049270561250"
+    },
+    {
+      "text": "01-3136-067-0040",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=0131360670040"
+    },
+    {
+      "text": "28-2210-006-0310",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=2822100060310"
+    },
+    {
+      "text": "02-3226-016-0710",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=0232260160710"
+    },
+    {
+      "text": "04-3002-056-0201",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=0430020560201"
+    },
+    {
+      "text": "01-3218-073-0260",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=0132180730260"
+    },
+    {
+      "text": "34-2110-007-0760",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3421100070760"
+    },
+    {
+      "text": "30-3115-020-0211",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3031150200211"
+    },
+    {
+      "text": "30-6018-000-0633",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=3060180000633"
+    },
+    {
+      "text": "01-3114-035-2905",
+      "href": "https://www.miamidade.gov/Apps/PA/propertysearch/#/?folio=0131140352905"
+    },
+    {
+      "text": "About Us",
+      "href": "index.cfm?zaction=home&zmethod=aboutUs"
+    },
+    {
+      "text": "Site Map",
+      "href": "index.cfm?zaction=home&zmethod=siteMap"
+    },
+    {
+      "text": "Privacy Policy",
+      "href": "index.cfm?zaction=home&zmethod=privpol"
+    },
+    {
+      "text": "User Agreement",
+      "href": "index.cfm?zaction=home&zmethod=agreement"
+    },
+    {
+      "text": "Bidder Letter",
+      "href": "index.cfm?zaction=home&zmethod=welcome"
+    },
+    {
+      "text": "Contact Us",
+      "href": "index.cfm?zaction=ContactUS&zmethod=START"
+    },
+    {
+      "text": "\u00a9 2026 Realauction.com LLC",
+      "href": "http://www.realauction.com"
+    },
+    {
+      "text": "Visit Realaction.com",
+      "href": "http://www.realauction.com"
+    }
+  ],
+  "html_length": 50499,
+  "page3_body_preview": "Home\nAbout Us\nFAQ\nContact Us\nUser Name\u00a0\u00a0\nUser Password\u00a0\u00a0\nSubmit\n\nForgot your username?\nForgot your password?\n\n\u00a0\nTraining\nLinks\nTraining\nForeclosure Process\nTax Deed Sale Process\nExternal\nLinks\nClerk Of Courts\nProperty Appraiser\nTax Collector\nmyFlorida.gov\nAO 2013-05\nJump\nTo\nSelect web site\nApache Taxdeed\nCoconino Taxdeed\nMohave Taxdeed\nAdams Treasurer Deed\nDenver Foreclosure\nDenver Treasurer Deed\nEagle Foreclosure\nEagle Treasurer Deed\nEl Paso Foreclosure\nEl Paso Treasurer Deed\nLarimer Foreclosure\nLarimer Treasurer Deed\nMesa Foreclosure\nMesa Treasurer Deed\nPitkin Treasurer Deed\nSummit Foreclosure\nWeld Foreclosure\nWeld Treasurer Deed\nAlachua Foreclosure\nAlachua Taxdeed\nBaker Taxdeed\nBay Foreclosure\nBay Taxdeed\nBrevard Taxdeed\nBroward Foreclosure\nCalhoun\nCharlotte\nCitrus Foreclosure\nCitrus Taxdeed\nClay Foreclosure\nClay Taxdeed\nDuval Foreclosure\nDuval Tax Deed\nEscambia Foreclosure\nEscambia Taxdeed\nFlagler Foreclosure\nFlagler Taxdeed\nGilchrist Foreclosure\nGilchrist Taxdeed\nGulf Foreclosure\nGulf Taxdeed\nHendry TaxDeed\nHernando Taxdeed\nHighlands Taxdeed\nHillsborough Foreclosure\nHillsborough Taxdeed\nIndian River Foreclosure\nIndian River Taxdeed\nJackson Foreclosure\nJackson Taxdeed\nLake Taxdeed\nLee Foreclosure\nLee Taxdeed\nLeon Foreclosure\nLeon Taxdeed\nManatee\nMarion Foreclosure\nMarion Taxdeed\nMartin Foreclosure\nMartin Taxdeed\nMonroe Taxdeed\nNassau Foreclosure\nNassau Taxdeed\nOkeechobee\nOrange Foreclosure\nOrange Taxdeed\nOsceola Taxdeed\nPalm Beach Foreclosure\nPalm Beach Taxdeed\nPasco Foreclosure\nPasco Taxdeed\nPinellas Foreclosure\nPinellas Taxdeed\nPolk Foreclosure\nPolk Taxdeed\nPutnam Foreclosure\nPutnam Taxdeed\nSaint Johns Foreclosure\nSanta Rosa Foreclosure\nSanta Rosa Taxdeed\nSarasota Foreclosure\nSarasota Taxdeed\nSeminole Foreclosure\nSeminole Taxdeed\nSt. Lucie\nSuwannee Taxdeed\nVolusia Foreclosure\nVolusia Taxdeed\nWalton\nWashington Foreclosure\nWashington Taxdeed\nHardyston Foreclosure\nNewark\n\u00a0\n\t\nSTART HERE\nREGISTER\nAUCTION CALENDAR\nConnection\nI:43 W:1\nAbout Us | Site Map | Privacy Policy | User Agreement | Bidder Letter | Contact Us\n\n\u00a9 2026 Realauction.com LLC\n\nVisit Realaction.com"
+}

@@ -1,23 +1,20 @@
 """
-SurplusIQ — Real Foreclosure Scraper
-Scrapes sold auction results from {county}.realforeclose.com
-Identifies third-party bidder sales and extracts case data
+SurplusIQ — Real Foreclosure Scraper v2
+Navigates the calendar UI properly and extracts sold auction results.
 """
 
 import asyncio
 import json
 import re
-import time
-from datetime import datetime, date
+import sys
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from playwright.async_api import async_playwright, TimeoutError as PWTimeout
 
-# ── Paths ────────────────────────────────────────────────────────────
-ROOT = Path(__file__).parent.parent
+ROOT     = Path(__file__).parent.parent
 DATA_DIR = ROOT / "data"
 DATA_DIR.mkdir(exist_ok=True)
 
-# ── Counties config (inline so scraper is self-contained) ────────────
 COUNTIES = [
     {"id": "miami-dade-fl",  "name": "Miami-Dade",  "state": "FL", "auction_url": "https://miami-dade.realforeclose.com",  "has_captcha": False, "doc_days": 14},
     {"id": "broward-fl",     "name": "Broward",     "state": "FL", "auction_url": "https://broward.realforeclose.com",     "has_captcha": False, "doc_days": 7},
@@ -31,344 +28,349 @@ COUNTIES = [
     {"id": "hamilton-oh",    "name": "Hamilton",    "state": "OH", "auction_url": "https://hamilton.realforeclose.com",    "has_captcha": True,  "doc_days": 10},
 ]
 
-# Keywords that indicate the plaintiff/lender won (NOT a third-party sale)
 PLAINTIFF_KEYWORDS = [
-    "plaintiff", "mortgagee", "bank", "n.a.", "n.a", "trust",
-    "llc", "lender", "financial", "federal", "national", "mortgage",
-    "fannie", "freddie", "wells fargo", "chase", "citibank", "bac",
-    "us bank", "u.s. bank", "pennymac", "newrez", "sls", "phh",
-    "ocwen", "nationstar", "mr. cooper", "lakeview", "freedom",
-    "no bid", "certificate", "certificate of title to plaintiff",
+    "bank", "n.a.", "trust", "financial", "federal", "national",
+    "mortgage", "fannie", "freddie", "wells fargo", "chase", "citibank",
+    "us bank", "u.s. bank", "pennymac", "newrez", "ocwen", "nationstar",
+    "mr. cooper", "lakeview", "freedom", "plaintiff", "certificate", "no bid",
 ]
 
 
-def is_third_party(winner_name: str, plaintiff_name: str) -> bool:
-    """Return True if winning bidder appears to be a third party."""
-    if not winner_name:
+def is_third_party(winner: str, plaintiff: str = "") -> bool:
+    if not winner or len(winner.strip()) < 3:
         return False
-    w = winner_name.lower().strip()
-    p = plaintiff_name.lower().strip() if plaintiff_name else ""
-
-    # Direct plaintiff match
-    if p and (p in w or w in p):
+    w = winner.lower().strip()
+    p = plaintiff.lower().strip() if plaintiff else ""
+    if p and (p[:20] in w or w[:20] in p):
         return False
-
-    # Common plaintiff/lender patterns
     for kw in PLAINTIFF_KEYWORDS:
         if kw in w:
             return False
-
     return True
 
 
 def clean_dollar(s: str) -> float:
-    """Convert '$123,456.78' string to float."""
     if not s:
         return 0.0
-    cleaned = re.sub(r"[^\d.]", "", str(s))
     try:
-        return float(cleaned)
+        return float(re.sub(r"[^\d.]", "", str(s)))
     except ValueError:
         return 0.0
 
 
-async def handle_captcha(page, county_name: str):
-    """Pause for manual CAPTCHA solve if detected."""
-    try:
-        # Check for common CAPTCHA indicators
-        content = await page.content()
-        captcha_indicators = ["captcha", "recaptcha", "hcaptcha", "challenge", "verify you are human"]
-        if any(ind in content.lower() for ind in captcha_indicators):
-            print(f"\n⚠️  CAPTCHA detected on {county_name}!")
-            print("   Please solve the CAPTCHA in the browser window.")
-            print("   Press ENTER here when done...")
-            input()
-            print(f"   ✓ Continuing {county_name} scrape...")
-    except Exception:
-        pass
-
-
 async def get_auction_day_ids(page, base_url: str, county_name: str) -> list:
     """
-    Navigate to the auction calendar and get recent auction day IDs.
-    RealForeclose uses AUCTIONDAYID parameter to identify each auction day.
+    Navigate the calendar and collect AUCTIONDAYID values.
+    Tries the current month and previous month.
     """
     day_ids = []
-    try:
-        # Go to the main auction page
-        await page.goto(f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW", timeout=30000)
-        await page.wait_for_timeout(2000)
+    today = date.today()
 
-        # Look for auction day links in the calendar
-        # RealForeclose shows recent auctions in a calendar format
-        links = await page.query_selector_all("a[href*='AUCTIONDAYID']")
-        for link in links:
-            href = await link.get_attribute("href")
-            match = re.search(r"AUCTIONDAYID=(\d+)", href or "")
-            if match:
-                did = match.group(1)
+    for month_offset in range(0, 3):
+        check = today - timedelta(days=30 * month_offset)
+        url = f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE={check.strftime('%m/%d/%Y')}"
+        try:
+            await page.goto(url, timeout=25000)
+            await page.wait_for_timeout(2500)
+
+            # Find all AUCTIONDAYID links in page
+            content = await page.content()
+            for m in re.finditer(r"AUCTIONDAYID=(\d+)", content):
+                did = m.group(1)
                 if did not in day_ids:
                     day_ids.append(did)
 
-        # Also check for date-based navigation
-        if not day_ids:
-            # Try the results page directly
-            results_link = await page.query_selector("a[href*='SOLD'], a[href*='sold'], a[href*='Results']")
-            if results_link:
-                href = await results_link.get_attribute("href")
-                await page.goto(f"{base_url}/{href}", timeout=30000)
-                await page.wait_for_timeout(2000)
-                links = await page.query_selector_all("a[href*='AUCTIONDAYID']")
-                for link in links:
-                    href2 = await link.get_attribute("href")
-                    match = re.search(r"AUCTIONDAYID=(\d+)", href2 or "")
-                    if match:
-                        did = match.group(1)
-                        if did not in day_ids:
-                            day_ids.append(did)
+            if day_ids:
+                print(f"    Found {len(day_ids)} auction day IDs (month -{month_offset})")
+                break
 
-        print(f"  Found {len(day_ids)} auction day IDs for {county_name}")
-        return day_ids[:10]  # Last 10 auction days max
+        except Exception:
+            continue
 
-    except Exception as e:
-        print(f"  ⚠ Could not get auction day IDs for {county_name}: {e}")
-        return []
+    # Also try clicking on any calendar day cells that look like auction dates
+    if not day_ids:
+        try:
+            await page.goto(f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW", timeout=20000)
+            await page.wait_for_timeout(2000)
+            content = await page.content()
+            for m in re.finditer(r"AUCTIONDAYID=(\d+)", content):
+                did = m.group(1)
+                if did not in day_ids:
+                    day_ids.append(did)
+        except Exception:
+            pass
+
+    return day_ids[:20]
 
 
-async def scrape_auction_results(page, base_url: str, day_id: str, county: dict) -> list:
-    """
-    Scrape the sold results for a specific auction day.
-    Returns list of raw property dicts.
-    """
+async def scrape_auction_day(page, base_url: str, day_id: str, county: dict) -> list:
+    """Scrape all sold properties for one auction day."""
     properties = []
-    url = f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDAYID={day_id}"
 
-    try:
-        await page.goto(url, timeout=30000)
-        await page.wait_for_timeout(2500)
-        await handle_captcha(page, county["name"])
+    urls = [
+        f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDAYID={day_id}",
+        f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=RESULTS&AUCTIONDAYID={day_id}",
+        f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDAYID={day_id}&STATUS=SOLD",
+    ]
 
-        # RealForeclose shows properties in rows — look for sold items
-        # The table typically has columns: case#, address, assessed value,
-        # opening bid, final bid, winner
-        rows = await page.query_selector_all("tr.AUCTION_ITEM, tr[class*='SOLD'], .AITEM, tr.altRow, tr.Row")
+    for url in urls:
+        try:
+            await page.goto(url, timeout=25000)
+            await page.wait_for_timeout(3000)
+            content = await page.content()
 
-        if not rows:
-            # Try alternate selectors
-            rows = await page.query_selector_all("table.AUCTION_DETAIL tr, .itemRow, tr[id*='item']")
-
-        for row in rows:
-            try:
-                row_text = await row.inner_text()
-                row_html = await row.inner_html()
-
-                # Skip header rows
-                if not row_text.strip() or "Case #" in row_text or "CASE #" in row_text:
-                    continue
-
-                # Extract all cells
-                cells = await row.query_selector_all("td")
-                if len(cells) < 4:
-                    continue
-
-                cell_texts = []
-                for cell in cells:
-                    t = await cell.inner_text()
-                    cell_texts.append(t.strip())
-
-                # Parse based on column position (RealForeclose standard layout)
-                # Col 0: Case Number
-                # Col 1: Property Address
-                # Col 2: Assessed/Appraised Value
-                # Col 3: Opening Bid / Judgment Amount
-                # Col 4: Final Bid / Sale Price
-                # Col 5: Winner Name
-                # Col 6: Status (SOLD, 3RD PARTY, etc.)
-
-                case_num    = cell_texts[0] if len(cell_texts) > 0 else ""
-                address     = cell_texts[1] if len(cell_texts) > 1 else ""
-                assessed    = clean_dollar(cell_texts[2]) if len(cell_texts) > 2 else 0.0
-                opening_bid = clean_dollar(cell_texts[3]) if len(cell_texts) > 3 else 0.0
-                final_bid   = clean_dollar(cell_texts[4]) if len(cell_texts) > 4 else 0.0
-                winner      = cell_texts[5] if len(cell_texts) > 5 else ""
-                status      = cell_texts[6] if len(cell_texts) > 6 else ""
-
-                # Skip if no final bid or no case number
-                if not case_num or final_bid == 0:
-                    continue
-
-                # Skip if clearly not sold
-                if status and any(s in status.upper() for s in ["CANCEL", "RECESS", "RESET", "CONTINUE"]):
-                    continue
-
-                # Try to extract plaintiff from case number page or row
-                # Plaintiff is often in a detail link
-                plaintiff = ""
-                plaintiff_link = await row.query_selector("a[href*='PLAINTIFF'], a[href*='plaintiff']")
-                if plaintiff_link:
-                    plaintiff = await plaintiff_link.inner_text()
-
-                # Also check for plaintiff in full row text
-                if not plaintiff:
-                    # Look for "vs" pattern: "BANK OF AMERICA vs JOHNSON"
-                    vs_match = re.search(r"(.+?)\s+vs\.?\s+(.+)", row_text, re.IGNORECASE)
-                    if vs_match:
-                        plaintiff = vs_match.group(1).strip()
-
-                prop = {
-                    "county_id":    county["id"],
-                    "county_name":  county["name"],
-                    "state":        county["state"],
-                    "auction_day_id": day_id,
-                    "case_number":  case_num.strip(),
-                    "address":      address.strip(),
-                    "assessed_value": assessed,
-                    "opening_bid":  opening_bid,
-                    "final_sale_price": final_bid,
-                    "winner_name":  winner.strip(),
-                    "plaintiff":    plaintiff.strip(),
-                    "status":       status.strip(),
-                    "scrape_url":   url,
-                    "scraped_at":   datetime.now().isoformat(),
-                    "sale_date":    date.today().isoformat(),
-                }
-                properties.append(prop)
-
-            except Exception as e:
+            # Skip login/home pages
+            if (("User Name" in content and "User Password" in content)
+                    or "KNOWING THERE" in content
+                    or len(content) < 5000):
                 continue
 
-        print(f"    Day {day_id}: {len(properties)} properties found")
+            # Save debug HTML on first county run
+            debug_dir = DATA_DIR / "diagnostics"
+            debug_dir.mkdir(exist_ok=True)
+            debug_file = debug_dir / f"{county['id']}_day{day_id}.html"
+            if not debug_file.exists():
+                debug_file.write_text(content)
+                await page.screenshot(path=str(debug_dir / f"{county['id']}_day{day_id}.png"))
 
-    except PWTimeout:
-        print(f"  ⚠ Timeout on {county['name']} day {day_id}")
-    except Exception as e:
-        print(f"  ⚠ Error on {county['name']} day {day_id}: {e}")
+            props = await extract_properties(page, content, county, day_id, url)
+            if props:
+                print(f"    Day {day_id}: {len(props)} properties")
+                properties.extend(props)
+                break
+
+        except PWTimeout:
+            continue
+        except Exception as e:
+            print(f"    Day {day_id} error: {e}")
+            continue
 
     return properties
 
 
-async def scrape_detail_page(page, base_url: str, case_num: str, county: dict) -> dict:
-    """
-    Visit the individual auction detail page to get more info:
-    plaintiff name, parcel ID, full address, defendant/owner name.
-    """
-    detail = {}
+async def extract_properties(page, html: str, county: dict, day_id: str, url: str) -> list:
+    """Extract properties using multiple strategies."""
+    results = []
+
+    # ── Strategy 1: Standard AUCTION_ITEM divs ─────────────────────
+    items = await page.query_selector_all(
+        ".AUCTION_ITEM, .aitem, [class*='ITEM'], "
+        "[class*='auction-item'], [id*='ITEM']"
+    )
+
+    # ── Strategy 2: Table rows with bid data ───────────────────────
+    if not items:
+        items = await page.query_selector_all("tr")
+
+    for item in items:
+        try:
+            text = (await item.inner_text()).strip()
+            if not text or len(text) < 15:
+                continue
+            # Must have a number pattern suggesting a bid amount
+            if not re.search(r"\$[\d,]+|\d{5,}", text):
+                continue
+            # Skip obvious headers
+            if any(h in text for h in ["Case #", "Opening Bid", "Final Bid", "Status", "Plaintiff"]):
+                continue
+
+            cells = await item.query_selector_all("td")
+            if not cells:
+                continue
+
+            vals = [(await c.inner_text()).strip() for c in cells]
+            if len(vals) < 3:
+                continue
+
+            prop = build_property(vals, text, county, day_id, url)
+            if prop:
+                results.append(prop)
+
+        except Exception:
+            continue
+
+    # ── Strategy 3: Regex fallback on raw HTML ─────────────────────
+    if not results:
+        results = regex_extract(html, county, day_id, url)
+
+    return results
+
+
+def build_property(vals: list, raw_text: str, county: dict, day_id: str, url: str):
+    """Build a property dict from table cell values."""
     try:
-        # Search by case number on the county site
-        search_url = f"{base_url}/index.cfm?zaction=AUCTION&Zmethod=SEARCH&SearchType=CN&SearchValue={case_num}"
-        await page.goto(search_url, timeout=20000)
-        await page.wait_for_timeout(1500)
+        # Find all dollar amounts
+        amounts = []
+        for v in vals:
+            amt = clean_dollar(v)
+            if amt > 500:
+                amounts.append(amt)
 
-        content = await page.content()
+        if not amounts:
+            return None
 
-        # Extract plaintiff (lender/foreclosing party)
-        plaintiff_match = re.search(
-            r"(?:Plaintiff|Lender|Mortgagee)[:\s]+([A-Z][^\n<]{5,80})",
-            content, re.IGNORECASE
+        # Try to identify case number (first cell that looks like a case #)
+        case_num = ""
+        for v in vals:
+            if re.match(r"\d{2,4}[-/]\w{2,4}[-/]\d{3,}", v) or re.match(r"^\d{6,}$", v):
+                case_num = v
+                break
+        if not case_num:
+            case_num = vals[0]
+
+        # Address: first cell with a street pattern
+        address = ""
+        for v in vals:
+            if re.search(r"\d+\s+\w+.*\s+(ST|AVE|BLVD|DR|RD|LN|CT|WAY|PL|CIR)\b", v, re.IGNORECASE):
+                address = v
+                break
+        if not address:
+            address = vals[1] if len(vals) > 1 else ""
+
+        # Bids
+        opening_bid = amounts[0] if amounts else 0
+        final_bid   = amounts[-1] if len(amounts) > 1 else 0
+
+        # No surplus possible if final <= opening
+        if final_bid <= opening_bid and final_bid > 0:
+            # Swap if it looks like the order is reversed
+            if final_bid < opening_bid:
+                pass  # Keep as is
+            else:
+                return None
+
+        # Winner: last non-dollar cell
+        winner = ""
+        for v in reversed(vals):
+            amt = clean_dollar(v)
+            if amt == 0 and len(v) > 2 and v != case_num:
+                winner = v
+                break
+
+        # Plaintiff: look for bank/lender name
+        plaintiff = ""
+        for v in vals:
+            v_lower = v.lower()
+            if any(kw in v_lower for kw in ["bank", "mortgage", "financial", "trust", "federal"]):
+                plaintiff = v
+                break
+
+        return {
+            "county_id":        county["id"],
+            "county_name":      county["name"],
+            "state":            county["state"],
+            "auction_day_id":   day_id,
+            "case_number":      case_num.strip(),
+            "address":          address.strip(),
+            "plaintiff":        plaintiff.strip(),
+            "opening_bid":      opening_bid,
+            "final_sale_price": final_bid if final_bid > 0 else opening_bid,
+            "winner_name":      winner.strip(),
+            "scrape_url":       url,
+            "scraped_at":       datetime.now().isoformat(),
+            "sale_date":        date.today().isoformat(),
+            "raw_cells":        vals[:8],
+        }
+    except Exception:
+        return None
+
+
+def regex_extract(html: str, county: dict, day_id: str, url: str) -> list:
+    """Regex fallback extraction from raw HTML."""
+    results = []
+    try:
+        pattern = re.compile(
+            r"(\d{4}[-/]\w{2,4}[-/]\d{4,})"
+            r".{5,400}?"
+            r"\$([\d,]+(?:\.\d{2})?)"
+            r".{1,300}?"
+            r"\$([\d,]+(?:\.\d{2})?)",
+            re.DOTALL
         )
-        if plaintiff_match:
-            detail["plaintiff"] = plaintiff_match.group(1).strip()
-
-        # Extract defendant (property owner)
-        defendant_match = re.search(
-            r"(?:Defendant|Owner|Borrower)[:\s]+([A-Z][^\n<]{3,60})",
-            content, re.IGNORECASE
-        )
-        if defendant_match:
-            detail["owner_name"] = defendant_match.group(1).strip()
-
-        # Extract parcel ID
-        parcel_match = re.search(
-            r"(?:Parcel|Folio|APN|Tax ID)[:\s#]+([A-Z0-9\-\.]{5,25})",
-            content, re.IGNORECASE
-        )
-        if parcel_match:
-            detail["parcel_id"] = parcel_match.group(1).strip()
-
-        # Extract sale date from page
-        date_match = re.search(
-            r"(?:Sale Date|Auction Date)[:\s]+(\d{1,2}/\d{1,2}/\d{2,4})",
-            content, re.IGNORECASE
-        )
-        if date_match:
-            detail["sale_date_str"] = date_match.group(1).strip()
-
-    except Exception as e:
+        seen = set()
+        for m in pattern.finditer(html):
+            case_num = m.group(1)
+            if case_num in seen:
+                continue
+            seen.add(case_num)
+            opening = clean_dollar(m.group(2))
+            final   = clean_dollar(m.group(3))
+            if final > opening > 100:
+                results.append({
+                    "county_id":        county["id"],
+                    "county_name":      county["name"],
+                    "state":            county["state"],
+                    "auction_day_id":   day_id,
+                    "case_number":      case_num,
+                    "address":          "",
+                    "plaintiff":        "",
+                    "opening_bid":      opening,
+                    "final_sale_price": final,
+                    "winner_name":      "",
+                    "scrape_url":       url,
+                    "scraped_at":       datetime.now().isoformat(),
+                    "sale_date":        date.today().isoformat(),
+                    "source":           "regex",
+                })
+    except Exception:
         pass
+    return results
 
-    return detail
 
-
-async def scrape_county(county: dict, playwright_instance, headless: bool = True) -> list:
-    """Full scrape pipeline for one county."""
+async def scrape_county(county: dict, pw, headless: bool = True) -> list:
     print(f"\n🔍 Scraping {county['name']} ({county['state']})...")
 
-    # CAPTCHA counties run headed so user can solve
+    # Always show browser for CAPTCHA counties; otherwise respect headless flag
     run_headless = headless and not county["has_captcha"]
 
-    browser = await playwright_instance.chromium.launch(
+    browser = await pw.chromium.launch(
         headless=run_headless,
-        args=["--no-sandbox", "--disable-blink-features=AutomationControlled"]
+        slow_mo=300,
+        args=["--no-sandbox", "--disable-blink-features=AutomationControlled"],
     )
     context = await browser.new_context(
-        user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
-        viewport={"width": 1280, "height": 800},
+        user_agent="Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 Chrome/122.0.0.0 Safari/537.36",
+        viewport={"width": 1280, "height": 900},
     )
     page = await context.new_page()
-
-    all_properties = []
+    all_props = []
 
     try:
-        # Step 1: Get auction day IDs
+        # Load home page first to set cookies/session
+        print(f"  Loading {county['auction_url']}...")
+        await page.goto(county["auction_url"], timeout=30000)
+        await page.wait_for_timeout(2000)
+
+        # Take screenshot of home page
+        debug_dir = DATA_DIR / "diagnostics"
+        debug_dir.mkdir(exist_ok=True)
+        await page.screenshot(path=str(debug_dir / f"{county['id']}_home.png"))
+
+        # Get auction day IDs from calendar
         day_ids = await get_auction_day_ids(page, county["auction_url"], county["name"])
+        print(f"  Auction days found: {len(day_ids)} — {day_ids[:5]}")
 
         if not day_ids:
-            print(f"  ⚠ No auction days found for {county['name']} — trying direct results page")
-            # Fallback: try direct results URL pattern
-            fallback_url = f"{county['auction_url']}/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&STATUS=SOLD"
-            await page.goto(fallback_url, timeout=20000)
-            await page.wait_for_timeout(2000)
-            await handle_captcha(page, county["name"])
-            # Try to extract from this page directly
-            day_ids = ["fallback"]
-
-        # Step 2: Scrape each auction day
-        for day_id in day_ids:
-            if day_id == "fallback":
-                props = await scrape_auction_results(page, county["auction_url"], "0", county)
-            else:
-                props = await scrape_auction_results(page, county["auction_url"], day_id, county)
-            all_properties.extend(props)
-            await asyncio.sleep(1.5)  # Be polite
-
-        # Step 3: For each property, try to get detail page info
-        print(f"  Fetching detail pages for {len(all_properties)} properties...")
-        for i, prop in enumerate(all_properties):
-            if prop.get("case_number"):
-                detail = await scrape_detail_page(page, county["auction_url"], prop["case_number"], county)
-                prop.update(detail)
-            if i % 10 == 0 and i > 0:
-                print(f"    {i}/{len(all_properties)} details fetched...")
-            await asyncio.sleep(0.5)
+            # Save home HTML for debugging
+            (debug_dir / f"{county['id']}_home.html").write_text(await page.content())
+            print(f"  ⚠ No auction days found — saved HTML for inspection")
+        else:
+            for day_id in day_ids:
+                props = await scrape_auction_day(page, county["auction_url"], day_id, county)
+                all_props.extend(props)
+                await asyncio.sleep(1.5)
 
     except Exception as e:
-        print(f"  ❌ Fatal error on {county['name']}: {e}")
+        print(f"  ❌ {county['name']}: {e}")
     finally:
         await browser.close()
 
-    print(f"  ✅ {county['name']}: {len(all_properties)} total properties scraped")
-    return all_properties
+    print(f"  ✅ {county['name']}: {len(all_props)} properties")
+    return all_props
 
 
-async def run_all_counties(county_ids: list = None, headless: bool = True) -> list:
-    """
-    Run scraper for all (or specified) counties.
-    Returns combined list of all scraped properties.
-    """
-    targets = COUNTIES
-    if county_ids:
-        targets = [c for c in COUNTIES if c["id"] in county_ids]
-
+async def run_all_counties(county_ids=None, headless=True):
+    targets = [c for c in COUNTIES if not county_ids or c["id"] in county_ids]
     all_results = []
 
     async with async_playwright() as pw:
@@ -376,55 +378,38 @@ async def run_all_counties(county_ids: list = None, headless: bool = True) -> li
             try:
                 results = await scrape_county(county, pw, headless=headless)
                 all_results.extend(results)
-
-                # Save per-county JSONL immediately (so partial runs aren't lost)
-                county_file = DATA_DIR / f"raw_{county['id']}_{date.today().isoformat()}.jsonl"
-                with open(county_file, "w") as f:
-                    for prop in results:
-                        f.write(json.dumps(prop) + "\n")
-                print(f"  💾 Saved {len(results)} records → {county_file.name}")
-
-                # Pause between counties to avoid hammering the server
+                out = DATA_DIR / f"raw_{county['id']}_{date.today().isoformat()}.jsonl"
+                with open(out, "w") as f:
+                    for p in results:
+                        f.write(json.dumps(p) + "\n")
                 await asyncio.sleep(3)
-
             except Exception as e:
-                print(f"❌ County {county['name']} failed: {e}")
-                continue
+                print(f"❌ {county['name']}: {e}")
 
-    # Save combined raw output
-    combined_file = DATA_DIR / f"raw_all_{date.today().isoformat()}.jsonl"
-    with open(combined_file, "w") as f:
-        for prop in all_results:
-            f.write(json.dumps(prop) + "\n")
+    combined = DATA_DIR / f"raw_all_{date.today().isoformat()}.jsonl"
+    with open(combined, "w") as f:
+        for p in all_results:
+            f.write(json.dumps(p) + "\n")
 
-    print(f"\n✅ Scrape complete: {len(all_results)} total properties across {len(targets)} counties")
-    print(f"💾 Combined output: {combined_file}")
+    print(f"\n✅ Done: {len(all_results)} properties across {len(targets)} counties")
     return all_results
 
 
-def load_raw(date_str: str = None) -> list:
-    """Load raw scraped data from JSONL file."""
+def load_raw(date_str=None):
     if not date_str:
         date_str = date.today().isoformat()
-    filepath = DATA_DIR / f"raw_all_{date_str}.jsonl"
-    if not filepath.exists():
-        # Try loading individual county files and merging
-        results = []
-        for f in DATA_DIR.glob(f"raw_*_{date_str}.jsonl"):
-            if "raw_all" not in f.name:
-                with open(f) as fp:
-                    for line in fp:
-                        line = line.strip()
-                        if line:
-                            results.append(json.loads(line))
-        return results
-    with open(filepath) as f:
-        return [json.loads(line) for line in f if line.strip()]
+    fp = DATA_DIR / f"raw_all_{date_str}.jsonl"
+    if fp.exists():
+        with open(fp) as f:
+            return [json.loads(l) for l in f if l.strip()]
+    results = []
+    for fp in DATA_DIR.glob(f"raw_*_{date_str}.jsonl"):
+        if "raw_all" not in fp.name:
+            with open(fp) as f:
+                results.extend(json.loads(l) for l in f if l.strip())
+    return results
 
 
 if __name__ == "__main__":
-    import sys
-    # Optional: pass specific county IDs as args
-    # e.g. python scraper/realforeclose.py miami-dade-fl broward-fl
     county_ids = sys.argv[1:] if len(sys.argv) > 1 else None
-    asyncio.run(run_all_counties(county_ids=county_ids, headless=True))
+    asyncio.run(run_all_counties(county_ids=county_ids, headless=False))

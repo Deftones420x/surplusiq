@@ -1,0 +1,920 @@
+<!DOCTYPE html><html lang="en" class="h-100"><head>
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+	<meta name="description" content="Realauction.com Public Website">
+	<meta name="author" content="Jeremy Page (Creative Director)">
+	<title>Online Auction Software Solutions - Realauction.com</title>
+	<base href="#event.getHTMLBaseURL()#">
+	
+	<link href="/includes/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+	<link href="/includes/css/app.css" rel="stylesheet">
+	<link href="/includes/fontawesome/css/all.css" rel="stylesheet">
+	
+	<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js" defer=""></script>
+	<script src="/includes/bootstrap/js/bootstrap.bundle.min.js" defer="" crossorigin="anonymous"></script>
+	<script src="/includes/scripts/fontawesome.js" defer=""></script>
+	<script src="/includes/scripts/app.js" defer=""></script>
+</head>
+
+
+
+<body class="ra">
+        
+	
+	<div class="modal" id="appModal" tabindex="-1">
+		<div class="modal-dialog modal-dialog-scrollable modal-xl">
+			<div class="modal-content" id="modalContent"></div>
+		</div>
+	</div>
+
+	
+	<div id="pageTransitionShell" class="">
+		<div class="mask1"></div>
+		<div class="mask2"></div>
+	</div>
+
+	
+	<div id="menuMobile">
+		<div class="menu-mobile">
+			<div class="menu-mobile-shell on" id="menuMobileMain">
+				<a href="javascript:void(0)" class="menu-mobile-link" data-site-nav="" data-loading-title="Realauction.com" data-loading-subtitle="returning to homepage">Home</a>
+				<a href="javascript:void(0)" class="menu-mobile-link menu-mobile-services">Services</a>
+				<a href="javascript:void(0)" class="menu-mobile-link" data-site-nav="training" data-loading-title="Training Classes" data-loading-subtitle="accessing training dates">Training</a>
+				<a href="javascript:void(0)" class="menu-mobile-link" data-site-nav="clients" data-loading-title="Client Sites" data-loading-subtitle="accessing client data">Clients</a>
+				<a href="javascript:void(0)" class="menu-mobile-link" data-site-nav="news" data-loading-title="News &amp; Events" data-loading-subtitle="accessing recent news">News</a>
+				<a href="javascript:void(0)" class="menu-mobile-link" data-site-nav="contact" data-loading-title="Contact Us" data-loading-subtitle="loading contact form">Contact</a>
+			</div>
+			<div class="menu-mobile-shell" id="menuMobileServices">
+				
+					<a href="javascript:void(0)" class="menu-mobile-back menu-mobile-services"><i class="fas fa-arrow-left"></i> BACK TO MENU</a>
+					<a href="javascript:void(0)" class="menu-mobile-link sub" data-site-nav="services/realtaxlien" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;TAXLIEN&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>TAXLIEN</strong></a><br>
+					<a href="javascript:void(0)" class="menu-mobile-link sub" data-site-nav="services/realtda" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;TDA&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>TDA</strong></a><br>
+					<a href="javascript:void(0)" class="menu-mobile-link sub" data-site-nav="services/realforeclose" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;FORECLOSE&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>FORECLOSE</strong></a><br>
+					<a href="javascript:void(0)" class="menu-mobile-link sub" data-site-nav="services/realtdm" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;TDM&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>TDM</strong></a><br>
+				
+			</div>
+			<div class="menu-mobile-footer">
+				<div class="text-center">
+					<span><i class="far fa-copyright"></i> 2004-2026 Realauction.com | <span data-site-nav="main/sitemap">Site Map</span>
+				</span></div>
+			</div>
+		</div>
+	</div>
+
+	
+	<div id="siteHeader">
+		<div class="sitenav">
+			<span class="d-none d-xl-block"><img src="/includes/images/logo_header_white.png" class="link" data-site-nav="" data-loading-title="Realauction.com" data-loading-subtitle="returning to homepage"></span>
+			<span class="d-block d-xl-none"><img src="/includes/images/logo_header_white.png" class="link" data-site-nav="" style="height: 25px;" data-loading-title="Realauction.com" data-loading-subtitle="returning to homepage"></span>
+			
+			<span class="d-lg-none">
+				<i class="fas fa-bars menu-mobile-toggle on"></i>
+				<i class="fas fa-times menu-mobile-toggle"></i>
+			</span>
+			
+			<span class="d-none d-lg-block">
+				<a href="javascript:void(0)" data-site-nav="" class="active" data-loading-title="Realauction.com" data-loading-subtitle="returning to homepage">home</a>
+				<span class="dropdown">
+					<a href="javascript:void(0)" data-bs-toggle="dropdown" class="">services</a>
+					<span class="dropdown-menu">
+						
+							<a href="javascript:void(0)" class="service" data-site-nav="services/realtaxlien" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;TAXLIEN&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>TAXLIEN</strong></a>
+							<a href="javascript:void(0)" class="service" data-site-nav="services/realtda" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;TDA&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>TDA</strong></a>
+							<a href="javascript:void(0)" class="service" data-site-nav="services/realforeclose" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;FORECLOSE&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>FORECLOSE</strong></a>
+							<a href="javascript:void(0)" class="service" data-site-nav="services/realtdm" data-loading-title="Accessing &lt;span&gt;REAL&lt;strong class=&quot;product &quot;&gt;TDM&lt;/strong&gt;&lt;/span&gt;" data-loading-subtitle="loading service details">REAL<strong>TDM</strong></a>
+						
+					</span>
+				</span>
+				<a href="javascript:void(0)" data-site-nav="training" class="" data-loading-title="Training Classes" data-loading-subtitle="accessing training dates">training</a>
+				<a href="javascript:void(0)" data-site-nav="clients" class="" data-loading-title="Client Sites" data-loading-subtitle="accessing client data">clients</a>
+				<a href="javascript:void(0)" data-site-nav="news" class="" data-loading-title="News &amp; Events" data-loading-subtitle="accessing recent news">news</a>
+				<a href="javascript:void(0)" data-site-nav="contact" class="" data-loading-title="Contact Us" data-loading-subtitle="loading contact form">contact</a>
+			</span>
+		</div>
+	</div>
+
+	
+	<div id="siteContent" class="">
+		
+			
+			
+
+    <input type="hidden" id="splashWords" value="online tax lien auctions,tax deed applications,tax deed management,foreclosure auctions,tax deed auctions,sheriff sale auctions,land sales">
+
+    <div class="splash home">
+        <span>knowing there's a solution is good.<br><em>being</em> the solution is better!</span>
+        <div class="splash-words d-none d-lg-block show">online tax lien auctions</div>
+        <div class="splash-words small d-block d-lg-none show">online tax lien auctions</div>
+        <button type="button" data-slide-to="aboutRealauction">LEARN MORE</button>
+        <div class="scroll-down">scroll <i class="fas fa-angle-double-down"></i> down</div>
+    </div>
+
+    <div class="scroll-spacer" id="aboutRealauction"></div>
+
+    <div class="container">
+        
+        <h1 class="text-center text-md-start">A Little Bit About Us</h1>
+        <div class="row">
+            <div class="col-12 col-lg-8">
+                <div class="content-box h-100">
+                    <h3>Company Details</h3>
+                    <span>REAL<strong class="product ra">AUCTION</strong></span> (<em>Realauction.com</em>) provides an array of online software solutions including: delinquent Tax Lien/Tax Certificate, Foreclosure, 
+                    Sheriff Sales, Land Sales, and other municipal property auctions. <span>REAL<strong class="product ra">AUCTION</strong></span> develops and hosts all our client sites, allowing bidders and 
+                    investors to participate online from the comfort of their own homes or offices.
+                    <div class="banner info my-3">
+                        <div class="p-2 d-flex justify-content-start align-items-center">
+                            <i class="fas fa-info-circle text-lg me-3"></i>
+                                <span>Founded in 2004, we have conducted over 1.5M online auctions to date.</span>
+                        </div>
+                    </div>
+                    In 2008, <span>REAL<strong class="product ra">AUCTION</strong></span> conducted the first ever online judicial foreclosure auction in the United States. Today, we have 
+                    become the largest online foreclosure software provider in the country. Our software solutions help municipality and county governments 
+                    across the country reduce the costs and manpower associated with traditional live auctions by conducting sales via the Internet in 
+                    compliance with state statutes.
+                    <h3 class="mt-4">Our Commitment to our Customers</h3>
+                    In an increasingly competitive world, <span>REAL<strong class="product ra">AUCTION</strong></span> provides cost-effective, innovative online auction solutions that help 
+                    municipal, county and state government agencies reach their full operating potential.
+                    <br><br>
+                    We are a trusted partner and work cooperatively with our clients to mitigate their toughest foreclosure, delinquent tax lien and tax deed management auction challenges. 
+                    We offer user friendly software, a dedicated customer service department, &amp; free online training. Our clients rely on us to assist in improving their processes &amp; 
+                    reducing the operating costs of holding live auctions.
+                </div>
+            </div>
+            <div class="col-12 col-lg-4 mt-3 mt-md-0">
+                <div class="content-box h-100">
+                    <h3>Core Values</h3>
+                    <div class="mb-3"><i class="fas fa-chevron-right me-2"></i>Trusted Partner<br></div>
+                    <div class="mb-3"><i class="fas fa-chevron-right me-2"></i>Innovative Solutions<br></div>
+                    <div class="mb-3"><i class="fas fa-chevron-right me-2"></i>Reliable Products<br></div>
+                    <div class="mb-3"><i class="fas fa-chevron-right me-2"></i>Cost Saving Champions<br></div>
+                    <div class="text-center text-lg-start">
+                        <h3 class="mt-3">Contact Us Today!</h3>
+                        <div class="mb-2">Find out how <span>REAL<strong class="product ra">AUCTION</strong></span> can work for you today!</div>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-standard btn-md-block" data-site-nav="contact">
+                                Contact
+                                <span class="d-inline-block d-xl-none">Us</span>
+                                <span class="d-none d-sm-inline-block d-md-none d-xl-inline-block">REAL<strong>AUCTION</strong></span>
+                            </button>
+                        </div>
+                        <h3 class="mt-3">Find Us Online</h3>
+                        <div class="socials">
+                            <a href="https://www.linkedin.com/company/realauction" target="blank"><i class="fab fa-linkedin me-3"></i></a>
+                            <a href="https://www.facebook.com/realauction" target="blank"><i class="fa-brands fa-square-facebook me-3"></i></a>
+                            <a href="https://www.twitter.com/realauction" target="blank"><i class="fa-brands fa-x-twitter"></i></a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        
+        <h1 class="mt-4">Latest News &amp; Events</h1>
+        
+
+    <div class="news-box taxlien mb-2 link" data-read-news="332">
+        <div class="row">
+            <div class="col-12 col-md-9 col-xl-10">
+                <div class="text-lg align-items-center">
+                    Upcoming Annual Florida Tax Lien Sales - May 2026
+                </div>
+                <div>
+                    
+                    <i class="far fa-comment-alt product taxlien"></i>
+                    <span>REAL<strong class="product taxlien">TAXLIEN</strong></span>
+                    <div class="text-muted d-block d-md-none">posted on April 10, 2026</div>
+                </div>
+                <div class="text-muted mt-2"><p class="mb-4">
+  Below is a list of upcoming annual Florida tax lien sales for <strong>May 2026</strong>.
+
+  Please visit the individual county s... [read more]</p></div>
+            </div>
+            <div class="col-12 col-md-3 col-xl-2 text-center d-flex flex-column justify-content-center align-items-center">
+                <div class="d-none d-md-inline" style="line-height: 1">
+                    <i class="fa-light fa-calendar-days text-xl icon-muted mb-2"></i>
+                    <div class="text-md">April 10</div>
+                    <div class="text-md text-muted">2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="newsContent332" class="hidden">
+        <div class="p-4">
+            <div class="text-center">
+                <div class="text-lg">Upcoming Annual Florida Tax Lien Sales - May 2026</div>
+                <div class="text-normal"><span>REAL<strong class="product taxlien">TAXLIEN</strong></span></div>
+                <div class="text-muted">posted on April 10, 2026</div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div><p class="mb-4">
+<br>  Below is a list of upcoming annual Florida tax lien sales for <strong>May 2026</strong>.
+<br>
+<br>  Please visit the individual county site for registration requirements, deposit deadlines,
+<br>  and sale details.
+<br></p>
+<br>
+<br><div class="row fw-semibold bg-light border-bottom">
+<br>  <div class="col-4 p-3">County</div>
+<br>  <div class="col-4 p-3">Auction Opens</div>
+<br>  <div class="col-4 p-3">Website</div>
+<br></div>
+<br>
+<br><div class="row border-bottom">
+<br>  <div class="col-4 p-3">Columbia County, FL</div>
+<br>  <div class="col-4 p-3">05/13/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://columbiafl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      columbiafl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom bg-light">
+<br>  <div class="col-4 p-3">Dixie County, FL</div>
+<br>  <div class="col-4 p-3">05/11/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://dixiefl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      dixiefl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom">
+<br>  <div class="col-4 p-3">Gadsden County, FL</div>
+<br>  <div class="col-4 p-3">05/07/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://gadsdenfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      gadsdenfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom bg-light">
+<br>  <div class="col-4 p-3">Gilchrist County, FL</div>
+<br>  <div class="col-4 p-3">05/11/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://gilchristfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      gilchristfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom">
+<br>  <div class="col-4 p-3">Hendry County, FL</div>
+<br>  <div class="col-4 p-3">05/11/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://hendryfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      hendryfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom bg-light">
+<br>  <div class="col-4 p-3">Highlands County, FL</div>
+<br>  <div class="col-4 p-3">05/06/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://highlandsfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      highlandsfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom">
+<br>  <div class="col-4 p-3">Lafayette County, FL</div>
+<br>  <div class="col-4 p-3">05/06/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://lafayettefl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      lafayettefl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom bg-light">
+<br>  <div class="col-4 p-3">Levy County, FL</div>
+<br>  <div class="col-4 p-3">05/08/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://levyfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      levyfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom">
+<br>  <div class="col-4 p-3">Palm Beach County, FL</div>
+<br>  <div class="col-4 p-3">05/04/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://palmbeachfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      palmbeachfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom bg-light">
+<br>  <div class="col-4 p-3">Polk County, FL</div>
+<br>  <div class="col-4 p-3">05/01/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://polkfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      polkfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom">
+<br>  <div class="col-4 p-3">Putnam County, FL</div>
+<br>  <div class="col-4 p-3">05/08/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://putnamfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      putnamfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row border-bottom bg-light">
+<br>  <div class="col-4 p-3">Suwannee County, FL</div>
+<br>  <div class="col-4 p-3">05/12/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://suwanneefl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      suwanneefl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div>
+<br>
+<br><div class="row">
+<br>  <div class="col-4 p-3">Taylor County, FL</div>
+<br>  <div class="col-4 p-3">05/06/2026</div>
+<br>  <div class="col-4 p-3">
+<br>    <a href="https://taylorfl.realtaxlien.com" target="_blank" rel="noopener">
+<br>      taylorfl.realtaxlien.com
+<br>    </a>
+<br>  </div>
+<br></div></div>
+        </div>
+        <div class="text-center py-3"><button type="button" class="btn btn-standard" data-bs-dismiss="modal">Done</button></div>
+    </div>
+
+    <div class="news-box taxlien mb-2 link" data-read-news="331">
+        <div class="row">
+            <div class="col-12 col-md-9 col-xl-10">
+                <div class="text-lg align-items-center">
+                    Upcoming Tax Lien Sales - April 2026
+                </div>
+                <div>
+                    
+                    <i class="far fa-comment-alt product taxlien"></i>
+                    <span>REAL<strong class="product taxlien">TAXLIEN</strong></span>
+                    <div class="text-muted d-block d-md-none">posted on March 27, 2026</div>
+                </div>
+                <div class="text-muted mt-2"><p>
+  The following is a list of upcoming tax lien sales for April 2026.
+
+  Be sure to visit the site of the county or municipality you are interes... [read more]</p></div>
+            </div>
+            <div class="col-12 col-md-3 col-xl-2 text-center d-flex flex-column justify-content-center align-items-center">
+                <div class="d-none d-md-inline" style="line-height: 1">
+                    <i class="fa-light fa-calendar-days text-xl icon-muted mb-2"></i>
+                    <div class="text-md">March 27</div>
+                    <div class="text-md text-muted">2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="newsContent331" class="hidden">
+        <div class="p-4">
+            <div class="text-center">
+                <div class="text-lg">Upcoming Tax Lien Sales - April 2026</div>
+                <div class="text-normal"><span>REAL<strong class="product taxlien">TAXLIEN</strong></span></div>
+                <div class="text-muted">posted on March 27, 2026</div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div><p>
+<br>  The following is a list of upcoming tax lien sales for April 2026.
+<br>
+<br>  Be sure to visit the site of the county or municipality you are interested in for critical deadlines, and contact our Customer Service with any questions.
+<br></p>
+<br>
+<br><div class="row">
+<br>  <div class="col-4 p-3"><strong>County / Municipality</strong></div>
+<br>  <div class="col-4 p-3"><strong>Opens</strong></div>
+<br>  <div class="col-4 p-3"><strong>URL</strong></div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Maricopa County, AZ (County Held)</div>
+<br>  <div class="col-4 p-3 border-top">04/01/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://maricopa.arizonataxsale.com/" target="_blank">maricopa.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Pima County, AZ (County Held)</div>
+<br>  <div class="col-4 p-3 border-top">04/01/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://pima.arizonataxsale.com/" target="_blank">pima.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Tuckerton, NJ</div>
+<br>  <div class="col-4 p-3 border-top">04/06/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://tuckerton.newjerseytaxsale.com/" target="_blank">tuckerton.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Frederick County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/01/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://frederick.marylandtaxsale.com/" target="_blank">frederick.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Charles County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/16/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://charles.marylandtaxsale.com/" target="_blank">charles.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Worcester County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/17/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://worcester.marylandtaxsale.com/" target="_blank">worcester.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Dorchester County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/20/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://dorchester.marylandtaxsale.com/" target="_blank">dorchester.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Queen Anne's County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/28/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://queenannes.marylandtaxsale.com/" target="_blank">queenannes.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Talbot County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/22/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://talbot.marylandtaxsale.com/" target="_blank">talbot.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Glassboro, NJ</div>
+<br>  <div class="col-4 p-3 border-top">04/20/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://glassboro.newjerseytaxsale.com/" target="_blank">glassboro.newjerseytaxsale.com</a>
+<br>  </div>
+<br>  <div class="col-4 p-3 border-top">South Brunswick, NJ</div>
+<br>  <div class="col-4 p-3 border-top">04/17/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://southbrunswick.newjerseytaxsale.com/" target="_blank">southbrunswick.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Stow Creek, NJ</div>
+<br>  <div class="col-4 p-3 border-top">04/20/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://stowcreek.newjerseytaxsale.com/" target="_blank">stowcreek.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Greenwich (Cumberland County), NJ</div>
+<br>  <div class="col-4 p-3 border-top">04/21/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://greenwich-cumberland.newjerseytaxsale.com/" target="_blank">greenwich-cumberland.newjerseytaxsale.com</a>
+<br>  </div>
+<br>  <div class="col-4 p-3 border-top">Kent County, MD</div>
+<br>  <div class="col-4 p-3 border-top">04/30/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://kent.marylandtaxsale.com/" target="_blank">kent.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Salem, NJ</div>
+<br>  <div class="col-4 p-3 border-top">04/30/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://salem.newjerseytaxsale.com/" target="_blank">salem.newjerseytaxsale.com</a>
+<br>  </div>
+<br></div></div>
+        </div>
+        <div class="text-center py-3"><button type="button" class="btn btn-standard" data-bs-dismiss="modal">Done</button></div>
+    </div>
+
+    <div class="news-box taxlien mb-2 link" data-read-news="330">
+        <div class="row">
+            <div class="col-12 col-md-9 col-xl-10">
+                <div class="text-lg align-items-center">
+                    Upcoming Tax Lien Sales - March 2026
+                </div>
+                <div>
+                    
+                    <i class="far fa-comment-alt product taxlien"></i>
+                    <span>REAL<strong class="product taxlien">TAXLIEN</strong></span>
+                    <div class="text-muted d-block d-md-none">posted on February 27, 2026</div>
+                </div>
+                <div class="text-muted mt-2"><p>
+  The following is a list of upcoming tax lien sales for March 2026.
+
+  Be sure to visit the site of the county or municipality you are interes... [read more]</p></div>
+            </div>
+            <div class="col-12 col-md-3 col-xl-2 text-center d-flex flex-column justify-content-center align-items-center">
+                <div class="d-none d-md-inline" style="line-height: 1">
+                    <i class="fa-light fa-calendar-days text-xl icon-muted mb-2"></i>
+                    <div class="text-md">February 27</div>
+                    <div class="text-md text-muted">2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="newsContent330" class="hidden">
+        <div class="p-4">
+            <div class="text-center">
+                <div class="text-lg">Upcoming Tax Lien Sales - March 2026</div>
+                <div class="text-normal"><span>REAL<strong class="product taxlien">TAXLIEN</strong></span></div>
+                <div class="text-muted">posted on February 27, 2026</div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div><p>
+<br>  The following is a list of upcoming tax lien sales for March 2026.
+<br>
+<br>  Be sure to visit the site of the county or municipality you are interested in for critical deadlines, and contact our Customer Service with any questions.
+<br></p>
+<br>
+<br><div class="row">
+<br>  <div class="col-4 p-3"><strong>County / Municipality</strong></div>
+<br>  <div class="col-4 p-3"><strong>Opens</strong></div>
+<br>  <div class="col-4 p-3"><strong>URL</strong></div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Maricopa County, AZ (County Held)</div>
+<br>  <div class="col-4 p-3 border-top">March 2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://maricopa.arizonataxsale.com/" target="_blank">maricopa.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Yavapai County, AZ (County Held)</div>
+<br>  <div class="col-4 p-3 border-top">03/03/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://yavapai.arizonataxsale.com/" target="_blank">yavapai.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Pinal County, AZ (County Held)</div>
+<br>  <div class="col-4 p-3 border-top">March 2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://pinal.arizonataxsale.com/" target="_blank">pinal.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Linwood, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/02/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://linwood.newjerseytaxsale.com/" target="_blank">linwood.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Camden, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/05/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://camden.newjerseytaxsale.com/" target="_blank">camden.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Elsinboro, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/06/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://elsinboro.newjerseytaxsale.com/" target="_blank">elsinboro.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Hoboken, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/11/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://hoboken.newjerseytaxsale.com/" target="_blank">hoboken.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Pine Hill, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/11/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://pinehill.newjerseytaxsale.com/" target="_blank">pinehill.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Maurice River, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/13/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://mauriceriver.newjerseytaxsale.com/" target="_blank">mauriceriver.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Pemberton, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/23/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://pemberton.newjerseytaxsale.com/" target="_blank">pemberton.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Mullica, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/23/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://mullica.newjerseytaxsale.com/" target="_blank">mullica.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Franklin Township, Gloucester County, NJ</div>
+<br>  <div class="col-4 p-3 border-top">03/24/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://franklin-gloucester.newjerseytaxsale.com/" target="_blank">franklin-gloucester.newjerseytaxsale.com</a>
+<br>  </div>
+<br></div>
+<br>``</div>
+        </div>
+        <div class="text-center py-3"><button type="button" class="btn btn-standard" data-bs-dismiss="modal">Done</button></div>
+    </div>
+
+    <div class="news-box taxlien mb-2 link" data-read-news="329">
+        <div class="row">
+            <div class="col-12 col-md-9 col-xl-10">
+                <div class="text-lg align-items-center">
+                    Upcoming Tax Lien Sales - February 2026
+                </div>
+                <div>
+                    
+                    <i class="far fa-comment-alt product taxlien"></i>
+                    <span>REAL<strong class="product taxlien">TAXLIEN</strong></span>
+                    <div class="text-muted d-block d-md-none">posted on January 29, 2026</div>
+                </div>
+                <div class="text-muted mt-2"><p>
+  The following is a list of upcoming tax lien sales for February 2026.
+
+  Be sure to visit the site of the county or municipality you are inte... [read more]</p></div>
+            </div>
+            <div class="col-12 col-md-3 col-xl-2 text-center d-flex flex-column justify-content-center align-items-center">
+                <div class="d-none d-md-inline" style="line-height: 1">
+                    <i class="fa-light fa-calendar-days text-xl icon-muted mb-2"></i>
+                    <div class="text-md">January 29</div>
+                    <div class="text-md text-muted">2026</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="newsContent329" class="hidden">
+        <div class="p-4">
+            <div class="text-center">
+                <div class="text-lg">Upcoming Tax Lien Sales - February 2026</div>
+                <div class="text-normal"><span>REAL<strong class="product taxlien">TAXLIEN</strong></span></div>
+                <div class="text-muted">posted on January 29, 2026</div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div><p>
+<br>  The following is a list of upcoming tax lien sales for February 2026.
+<br>
+<br>  Be sure to visit the site of the county or municipality you are interested in for critical deadlines, and contact our Customer Service with any questions.
+<br></p>
+<br>
+<br><div class="row">
+<br>  <div class="col-4 p-3"><strong>County / Municipality</strong></div>
+<br>  <div class="col-4 p-3"><strong>Opens</strong></div>
+<br>  <div class="col-4 p-3"><strong>URL</strong></div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Pima County, AZ</div>
+<br>  <div class="col-4 p-3 border-top">02/02/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://pima.arizonataxsale.com/" target="_blank">pima.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Navajo County, AZ</div>
+<br>  <div class="col-4 p-3 border-top">02/03/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://navajo.arizonataxsale.com/" target="_blank">navajo.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Apache County, AZ</div>
+<br>  <div class="col-4 p-3 border-top">02/04/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://apache.arizonataxsale.com/" target="_blank">apache.arizonataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Douglas County, NE</div>
+<br>  <div class="col-4 p-3 border-top">02/05/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://douglas.nebraskataxsale.com/" target="_blank">douglas.nebraskataxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">St. Mary’s County, MD</div>
+<br>  <div class="col-4 p-3 border-top">02/06/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://stmarys.marylandtaxsale.com/" target="_blank">stmarys.marylandtaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Absecon, NJ</div>
+<br>  <div class="col-4 p-3 border-top">02/16/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://absecon.newjerseytaxsale.com/" target="_blank">absecon.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Woodbine, NJ</div>
+<br>  <div class="col-4 p-3 border-top">02/23/2026</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://woodbine.newjerseytaxsale.com/" target="_blank">woodbine.newjerseytaxsale.com</a>
+<br>  </div>
+<br></div>
+<br></div>
+        </div>
+        <div class="text-center py-3"><button type="button" class="btn btn-standard" data-bs-dismiss="modal">Done</button></div>
+    </div>
+
+    <div class="news-box taxlien mb-2 link" data-read-news="328">
+        <div class="row">
+            <div class="col-12 col-md-9 col-xl-10">
+                <div class="text-lg align-items-center">
+                    Upcoming Tax Lien Sales - January 2026
+                </div>
+                <div>
+                    
+                    <i class="far fa-comment-alt product taxlien"></i>
+                    <span>REAL<strong class="product taxlien">TAXLIEN</strong></span>
+                    <div class="text-muted d-block d-md-none">posted on December 29, 2025</div>
+                </div>
+                <div class="text-muted mt-2"><p> The following is a list of upcoming tax lien sales for January 2026. Be sure to visit the site of the county you are interested in for critical de... [read more]</p></div>
+            </div>
+            <div class="col-12 col-md-3 col-xl-2 text-center d-flex flex-column justify-content-center align-items-center">
+                <div class="d-none d-md-inline" style="line-height: 1">
+                    <i class="fa-light fa-calendar-days text-xl icon-muted mb-2"></i>
+                    <div class="text-md">December 29</div>
+                    <div class="text-md text-muted">2025</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="newsContent328" class="hidden">
+        <div class="p-4">
+            <div class="text-center">
+                <div class="text-lg">Upcoming Tax Lien Sales - January 2026</div>
+                <div class="text-normal"><span>REAL<strong class="product taxlien">TAXLIEN</strong></span></div>
+                <div class="text-muted">posted on December 29, 2025</div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div><p> The following is a list of upcoming tax lien sales for January 2026. Be sure to visit the site of the county you are interested in for critical deadlines, and contact our Customer Service with any questions.</p> <div class="row"> <div class="col-4 p-3"><strong>County</strong></div> <div class="col-4 p-3"><strong>Opens</strong></div> <div class="col-4 p-3"><strong>URL</strong></div> <div class="col-4 p-3 border-top">Maricopa County, AZ</div> <div class="col-4 p-3 border-top">01/20/2026</div> <div class="col-4 p-3 border-top"> <a href="https://maricopa.arizonataxsale.com/" target="_blank">maricopa.arizonataxsale.com</a> </div> <div class="col-4 p-3 border-top">Santa Cruz County, AZ</div> <div class="col-4 p-3 border-top">01/20/2026</div> <div class="col-4 p-3 border-top"> <a href="https://santacruz.arizonataxsale.com/" target="_blank">santacruz.arizonataxsale.com</a> </div> <div class="col-4 p-3 border-top">Coconino County, AZ</div> <div class="col-4 p-3 border-top">01/20/2026</div> <div class="col-4 p-3 border-top"> <a href="https://coconino.arizonataxsale.com/" target="_blank">coconino.arizonataxsale.com</a> </div> <div class="col-4 p-3 border-top">Yavapai County, AZ</div> <div class="col-4 p-3 border-top">01/08/2026</div> <div class="col-4 p-3 border-top"> <a href="https://yavapai.arizonataxsale.com/" target="_blank">yavapai.arizonataxsale.com</a> </div> <div class="col-4 p-3 border-top">Pinal County, AZ</div> <div class="col-4 p-3 border-top">01/30/2026</div> <div class="col-4 p-3 border-top"> <a href="https://pinal.arizonataxsale.com/" target="_blank">pinal.arizonataxsale.com</a> </div> <div class="col-4 p-3 border-top">Mohave County, AZ</div> <div class="col-4 p-3 border-top">01/26/2026</div> <div class="col-4 p-3 border-top"> <a href="https://mohave.arizonataxsale.com/" target="_blank">mohave.arizonataxsale.com</a> </div> <div class="col-4 p-3 border-top">Nassau County, NY</div> <div class="col-4 p-3 border-top">01/21/2026</div> <div class="col-4 p-3 border-top"> <a href="https://nassau.newyorktaxsale.com/" target="_blank">nassau.newyorktaxsale.com</a> </div> </div></div>
+        </div>
+        <div class="text-center py-3"><button type="button" class="btn btn-standard" data-bs-dismiss="modal">Done</button></div>
+    </div>
+
+    <div class="news-box taxlien mb-2 link" data-read-news="327">
+        <div class="row">
+            <div class="col-12 col-md-9 col-xl-10">
+                <div class="text-lg align-items-center">
+                    Upcoming Tax Lien Sales - December 2025
+                </div>
+                <div>
+                    
+                    <i class="far fa-comment-alt product taxlien"></i>
+                    <span>REAL<strong class="product taxlien">TAXLIEN</strong></span>
+                    <div class="text-muted d-block d-md-none">posted on December 1, 2025</div>
+                </div>
+                <div class="text-muted mt-2"><p>
+  The following is a list of the upcoming tax lien sales for December 2025.
+
+  Be sure to visit the site of the county you are interested in fo... [read more]</p></div>
+            </div>
+            <div class="col-12 col-md-3 col-xl-2 text-center d-flex flex-column justify-content-center align-items-center">
+                <div class="d-none d-md-inline" style="line-height: 1">
+                    <i class="fa-light fa-calendar-days text-xl icon-muted mb-2"></i>
+                    <div class="text-md">December 1</div>
+                    <div class="text-md text-muted">2025</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div id="newsContent327" class="hidden">
+        <div class="p-4">
+            <div class="text-center">
+                <div class="text-lg">Upcoming Tax Lien Sales - December 2025</div>
+                <div class="text-normal"><span>REAL<strong class="product taxlien">TAXLIEN</strong></span></div>
+                <div class="text-muted">posted on December 1, 2025</div>
+            </div>
+        </div>
+        <div class="modal-body">
+            <div><p>
+<br>  The following is a list of the upcoming tax lien sales for December 2025.
+<br>
+<br>  Be sure to visit the site of the county you are interested in for critical deadlines, and contact our Customer Service with any questions!
+<br>
+<br>  Toll-free: <strong>1-877-361-7325</strong> or email:
+<br>  <a href="mailto:customerservice@realauction.com">customerservice@realauction.com</a>
+<br></p>
+<br>
+<br><div class="row">
+<br>  <div class="col-4 p-3"><strong>County</strong></div>
+<br>  <div class="col-4 p-3"><strong>Opens</strong></div>
+<br>  <div class="col-4 p-3"><strong>URL</strong></div>
+<br>
+<br>  <div class="col-4 p-3 border-top">South Amboy</div>
+<br>  <div class="col-4 p-3 border-top">12/01/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://southamboy.newjerseytaxsale.com/" target="_blank">southamboy.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Orange City</div>
+<br>  <div class="col-4 p-3 border-top">12/01/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://orangecity.newjerseytaxsale.com/" target="_blank">orangecity.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Ewing</div>
+<br>  <div class="col-4 p-3 border-top">12/01/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://ewing.newjerseytaxsale.com/" target="_blank">ewing.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Gloucester Twp</div>
+<br>  <div class="col-4 p-3 border-top">12/01/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://gloucestertownship.newjerseytaxsale.com/" target="_blank">gloucestertownship.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Millville</div>
+<br>  <div class="col-4 p-3 border-top">12/08/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://millville.newjerseytaxsale.com/" target="_blank">millville.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Lacey</div>
+<br>  <div class="col-4 p-3 border-top">12/15/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://lacey.newjerseytaxsale.com/" target="_blank">lacey.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Commercial</div>
+<br>  <div class="col-4 p-3 border-top">12/22/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://commercial.newjerseytaxsale.com/" target="_blank">commercial.newjerseytaxsale.com</a>
+<br>  </div>
+<br>
+<br>  <div class="col-4 p-3 border-top">Teaneck</div>
+<br>  <div class="col-4 p-3 border-top">12/22/2025</div>
+<br>  <div class="col-4 p-3 border-top">
+<br>    <a href="https://teaneck.newjerseytaxsale.com/" target="_blank">teaneck.newjerseytaxsale.com</a>
+<br>  </div>
+<br></div>
+<br></div>
+        </div>
+        <div class="text-center py-3"><button type="button" class="btn btn-standard" data-bs-dismiss="modal">Done</button></div>
+    </div>
+
+
+        <div class="mt-3 text-center text-lg-end"><a href="https://www.realauction.com/news/index" type="button" class="btn btn-standard">View All News &amp; Events <i class="fas fa-chevron-right"></i></a></div>
+    </div>
+
+		
+	</div>
+	
+	
+	
+		<div id="siteFooter">
+			<div class="container d-none d-md-block">
+				<div class="row">
+					<div class="col-4 footer-tab">
+						<i class="fas fa-map-marked-alt icon"></i>
+						<h3>Location</h3>
+						<i class="fas fa-map-marker-alt d-none d-md-inline-block"></i> Plantation, FL 33324<br>
+						<i class="fas fa-map-marker-alt d-none d-md-inline-block"></i> Lubbock, TX 79401<br>
+						
+					</div>
+					<div class="col-4 footer-tab">
+						<i class="fas fa-mobile-alt icon"></i>
+						<h3>Phone</h3>
+						<i class="fas fa-phone-alt"></i> (954) 734-7400<br>
+						<i class="fas fa-phone-alt"></i> (877) 361-7325<br>
+						<i class="fas fa-fax"></i> (954) 424-7601
+					</div>
+					<div class="col-4 footer-tab">
+						<i class="fas fa-envelope icon"></i>
+						<h3>Contact</h3>
+						<a href="mailto:sales@realauction.com" class="footer-link"><i class="fas fa-at"></i> Sales Department</a>
+						<a href="mailto:customerservice@realauction.com" class="footer-link"><i class="fas fa-at"></i> Customer Service</a>
+						<a href="https://www.linkedin.com/company/realauction" class="footer-link" target="blank"><i class="fa-brands fa-linkedin"></i> View on LinkedIn</a>
+					</div>
+				</div>
+				<div class="mt-4">
+					<i class="far fa-copyright"></i>
+					Copyright 2004-2026
+					» Realauction.com, LLC
+					» <a href="javascript:void(0)" data-site-nav="main/sitemap" data-loading-title="Site Map" data-loading-subtitle="fetching site map data">Site Map</a>
+				</div>
+			</div>
+			<div class="container d-md-none">
+				<div class="row">
+					<div class="col-12">
+						<i class="fas fa-map-marked-alt icon mobile"></i> Plantation FL / Lubbock TX
+					</div>
+					<div class="col-12"><i class="fas fa-mobile-alt icon mobile"></i> (954) 734-7400</div>
+					<div class="col-12"><i class="fas fa-phone-alt icon mobile"></i> (877) 361-7325</div>
+					<div class="col-12">
+						<span class="dropdown">
+							<a class="btn btn-footer" data-toggle="dropdown"><i class="fas fa-envelope icon"></i> Email</a>
+							<div class="dropdown-menu">
+								<a href="mailto:sales@realauction.com" class="dropdown-item"><i class="fas fa-at"></i> Sales Department</a>
+								<a href="mailto:customerservice@realauction.com" class="dropdown-item"><i class="fas fa-at"></i> Customer Service</a>
+							</div>
+						</span>
+						<a href="https://www.linkedin.com/company/realauction" class="btn btn-footer" target="blank"><i class="fab fa-linkedin-in icon"></i> LinkedIn</a>
+					</div>
+				</div>
+				<div class="mt-3"><i class="fas fa-copyright"></i> 2004-2026 » Realauction.com, LLC</div>
+			</div>
+		</div>
+	
+
+
+</body></html>
