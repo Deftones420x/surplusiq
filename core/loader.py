@@ -1,22 +1,31 @@
 """
-SurplusIQ — Unified Data Loader
+SurplusIQ — Unified Data Loader (v2 — 14-day cutoff enforced)
 
 Consolidates raw scraped data from all 10 counties into a single clean dataset
 ready for Excel export, dashboard rendering, and PropertyRadar enrichment.
 
+CHANGES IN v2:
+  • Hard 14-day window: any lead with sale_date older than (today - 14 days)
+    is dropped before reaching the dashboard / Excel / enrichment.
+  • If sale_date can't be parsed, the lead is dropped as well.
+  • Console output reports how many were dropped and why, so we can verify
+    the filter is doing what we expect each time.
+
 Usage:
     from core.loader import load_all_leads, get_summary
 
-    leads = load_all_leads()                    # all qualifying leads
-    leads = load_all_leads(min_surplus=25000)   # higher threshold
+    leads = load_all_leads()                    # all qualifying leads (last 14 days)
+    leads = load_all_leads(min_surplus=25000)   # higher surplus threshold
+    leads = load_all_leads(window_days=7)       # tighter date window
     summary = get_summary(leads)                # county totals
 """
 
 from __future__ import annotations
 import json
 import os
+import re
 from dataclasses import dataclass, asdict, field
-from datetime import datetime, date
+from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Optional
 
@@ -66,62 +75,95 @@ class Lead:
     # Property
     address:        str
     parcel_id:      str
-    auction_type:   str        # FORECLOSURE / TAX DEED / etc.
+    auction_type:   str
 
     # Financials
     opening_bid:    float
     final_sale_price: float
-    gross_surplus:  float       # final_sale - opening_bid
+    gross_surplus:  float
     assessed_value: float
 
     # Sale details
-    sale_date:      str
-    sold_to:        str         # "3rd Party Bidder" / "Plaintiff"
+    sale_date:      str         # ISO format (YYYY-MM-DD) after normalization
+    sold_to:        str
     is_third_party: bool
 
     # Lead quality
-    auction_status: str         # "Sold" / "Redeemed"
+    auction_status: str
 
     # Source
-    scraped_at:     str         # ISO timestamp of scrape
+    scraped_at:     str
     source_file:    str
 
-    # Lead score (computed)
-    score:          str = ""    # "A+" / "A" / "B" / "C"
+    # Lead score
+    score:          str = ""
     score_reason:   str = ""
 
-    # Enrichment placeholders (filled later by PropertyRadar)
+    # Enrichment placeholders
     enriched:           bool   = False
     estimated_value:    float  = 0.0
     mortgage_balance:   float  = 0.0
     secondary_liens:    float  = 0.0
-    net_surplus:        float  = 0.0    # gross_surplus - liens
+    net_surplus:        float  = 0.0
     owner_name:         str    = ""
     owner_address:      str    = ""
 
-    # Claim status (filled later by clerk scraper)
+    # Claim status
     claim_filed:        bool   = False
-    claim_status:       str    = "Unknown"  # Not Filed / Filed / Funds Disbursed
+    claim_status:       str    = "Unknown"
 
     def to_dict(self) -> dict:
         return asdict(self)
 
 
 # ═══════════════════════════════════════════════════════════════════════
-# Loaders
+# Helpers
 # ═══════════════════════════════════════════════════════════════════════
 def _latest_jsonl_for_county(county_id: str) -> Optional[Path]:
-    """Find the most recent JSONL file for a given county."""
     pattern = f"{county_id}_*.jsonl"
     files = sorted(RAW_DIR.glob(pattern))
     return files[-1] if files else None
 
 
 def _normalize_address(raw: str) -> str:
-    """Strip 'Property Address:' prefix and trim."""
     if not raw:
         return ""
     return raw.replace("Property Address:", "").strip()
+
+
+def _extract_sale_date(record: dict) -> Optional[date]:
+    """
+    Try every plausible source for the sale date and return a date object.
+    Returns None if no parseable date is found.
+    """
+    # Direct fields first
+    for key in ("sale_date", "sale_datetime", "auction_date", "soldDate", "AUCTIONDATE"):
+        v = record.get(key)
+        if v:
+            iso = str(v)[:10]
+            try:
+                return date.fromisoformat(iso)
+            except ValueError:
+                pass
+
+    # Pull from raw_text — most scrapers store the unparsed page text
+    raw_text = record.get("raw_text", "") or ""
+
+    patterns = [
+        r"(\d{1,2}/\d{1,2}/\d{4})\s+\d{1,2}:\d{2}",
+        r"Sold on\s+(\d{1,2}/\d{1,2}/\d{4})",
+        r"Sale Date[:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+        r"AUCTIONDATE[=:\s]+(\d{1,2}/\d{1,2}/\d{4})",
+        r"(\d{1,2}/\d{1,2}/\d{4})",
+    ]
+    for pat in patterns:
+        m = re.search(pat, raw_text)
+        if m:
+            try:
+                return datetime.strptime(m.group(1), "%m/%d/%Y").date()
+            except ValueError:
+                continue
+    return None
 
 
 def _parse_lead(record: dict, county_id: str, source_file: str) -> Optional[Lead]:
@@ -136,6 +178,10 @@ def _parse_lead(record: dict, county_id: str, source_file: str) -> Optional[Lead
     except (ValueError, TypeError):
         return None
 
+    # Normalize sale_date to ISO format if we can extract one
+    parsed_date = _extract_sale_date(record)
+    sale_date_iso = parsed_date.isoformat() if parsed_date else (record.get("sale_date") or "").strip()
+
     return Lead(
         county_id     = county_id,
         county_name   = info.get("name", county_id),
@@ -148,7 +194,7 @@ def _parse_lead(record: dict, county_id: str, source_file: str) -> Optional[Lead
         final_sale_price = final,
         gross_surplus = surplus,
         assessed_value   = assessed,
-        sale_date     = (record.get("sale_date") or "").strip(),
+        sale_date     = sale_date_iso,
         sold_to       = (record.get("sold_to") or "").strip(),
         is_third_party = bool(record.get("is_third_party", False)),
         auction_status = (record.get("auction_status") or "").strip(),
@@ -158,16 +204,6 @@ def _parse_lead(record: dict, county_id: str, source_file: str) -> Optional[Lead
 
 
 def _score_lead(lead: Lead) -> tuple[str, str]:
-    """
-    Score a lead A+ / A / B / C based on surplus size and quality signals.
-    Returns (score, reason).
-
-    Tiers:
-      A+   : surplus ≥ $100K — top priority
-      A    : surplus ≥ $50K
-      B    : surplus ≥ $25K
-      C    : surplus ≥ $10K (minimum threshold)
-    """
     s = lead.gross_surplus
     reasons = []
 
@@ -187,7 +223,6 @@ def _score_lead(lead: Lead) -> tuple[str, str]:
         score = "—"
         reasons.append("below threshold")
 
-    # Bonus signals
     if lead.is_third_party:
         reasons.append("3rd party bidder ✓")
     if lead.address:
@@ -205,25 +240,45 @@ def load_all_leads(
     min_surplus: float = 10_000,
     require_third_party: bool = True,
     counties: Optional[list[str]] = None,
+    window_days: int = 14,
+    verbose: bool = True,
 ) -> list[Lead]:
     """
     Load all qualifying leads from raw JSONL files across all counties.
+
+    Filters applied (in order):
+      1. is_third_party (must be True if require_third_party)
+      2. gross_surplus >= min_surplus
+      3. sale_date must be parseable
+      4. sale_date >= (today - window_days)  ← NEW in v2
 
     Args:
         min_surplus: Minimum gross surplus required to qualify (default $10K)
         require_third_party: Only include 3rd party bidder wins (default True)
         counties: Optional list of county_ids to include (default: all 10)
+        window_days: Maximum age of sale_date in days (default 14)
+        verbose: Print summary of what was filtered out
 
     Returns:
         List of Lead objects, sorted by gross_surplus descending.
     """
     target_counties = counties or list(COUNTY_INFO.keys())
+    today = date.today()
+    cutoff = today - timedelta(days=window_days)
     leads: list[Lead] = []
+
+    # Track what got filtered out, per county
+    stats = {
+        cid: {"raw": 0, "kept": 0, "not_3rd_party": 0, "below_min": 0,
+              "no_date": 0, "out_of_window": 0}
+        for cid in target_counties
+    }
 
     for county_id in target_counties:
         jsonl_path = _latest_jsonl_for_county(county_id)
         if not jsonl_path:
-            print(f"⚠ No data file found for {county_id}")
+            if verbose:
+                print(f"⚠ No data file found for {county_id}")
             continue
 
         with open(jsonl_path) as f:
@@ -236,40 +291,72 @@ def load_all_leads(
                 except json.JSONDecodeError:
                     continue
 
+                stats[county_id]["raw"] += 1
+
                 lead = _parse_lead(record, county_id, str(jsonl_path.name))
                 if not lead:
                     continue
 
-                # Apply qualifying filters
+                # Filter 1: 3rd party
                 if require_third_party and not lead.is_third_party:
-                    continue
-                if lead.gross_surplus < min_surplus:
+                    stats[county_id]["not_3rd_party"] += 1
                     continue
 
-                # Score the lead
+                # Filter 2: minimum surplus
+                if lead.gross_surplus < min_surplus:
+                    stats[county_id]["below_min"] += 1
+                    continue
+
+                # Filter 3: sale_date must be parseable
+                parsed_date = _extract_sale_date(record)
+                if not parsed_date:
+                    stats[county_id]["no_date"] += 1
+                    continue
+
+                # Filter 4: sale_date within window_days of today
+                if parsed_date < cutoff:
+                    stats[county_id]["out_of_window"] += 1
+                    continue
+
+                # Score and keep
                 lead.score, lead.score_reason = _score_lead(lead)
+                stats[county_id]["kept"] += 1
                 leads.append(lead)
 
-    # Sort by surplus descending
     leads.sort(key=lambda x: x.gross_surplus, reverse=True)
+
+    # Print filter audit if verbose
+    if verbose:
+        total_raw = sum(s["raw"] for s in stats.values())
+        total_kept = sum(s["kept"] for s in stats.values())
+        total_dropped_window = sum(s["out_of_window"] for s in stats.values())
+        total_dropped_date = sum(s["no_date"] for s in stats.values())
+
+        print(f"\n  Date filter: keeping leads sold on or after {cutoff.isoformat()} (last {window_days} days)")
+        print(f"  Loaded {total_kept} qualifying leads from {total_raw} raw records.")
+        if total_dropped_window or total_dropped_date:
+            print(f"  Dropped {total_dropped_window} as out-of-window, {total_dropped_date} with no parseable date.")
+
+        # Show per-county breakdown if anything was dropped for date reasons
+        if total_dropped_window or total_dropped_date:
+            print("\n  Per-county date-filter impact:")
+            for cid in target_counties:
+                s = stats[cid]
+                if s["out_of_window"] > 0 or s["no_date"] > 0:
+                    print(f"    {cid:<18}: kept {s['kept']:>2}, "
+                          f"dropped {s['out_of_window']:>2} out-of-window, "
+                          f"{s['no_date']:>2} no-date")
+
     return leads
 
 
 def get_summary(leads: list[Lead]) -> dict:
-    """
-    Generate a summary breakdown of leads:
-      - Per-county counts and totals
-      - Per-state totals
-      - Score distribution
-      - Grand totals
-    """
     by_county: dict[str, dict] = {}
     by_state: dict[str, dict] = {"FL": {"leads": 0, "surplus": 0.0},
                                   "OH": {"leads": 0, "surplus": 0.0}}
     by_score = {"A+": 0, "A": 0, "B": 0, "C": 0}
 
     for lead in leads:
-        # County aggregation
         cid = lead.county_id
         if cid not in by_county:
             by_county[cid] = {
@@ -284,12 +371,10 @@ def get_summary(leads: list[Lead]) -> dict:
         by_county[cid]["surplus"] += lead.gross_surplus
         by_county[cid]["top_lead"] = max(by_county[cid]["top_lead"], lead.gross_surplus)
 
-        # State aggregation
         if lead.state in by_state:
             by_state[lead.state]["leads"] += 1
             by_state[lead.state]["surplus"] += lead.gross_surplus
 
-        # Score aggregation
         if lead.score in by_score:
             by_score[lead.score] += 1
 
@@ -308,6 +393,7 @@ def get_summary(leads: list[Lead]) -> dict:
                 "address":     l.address,
                 "surplus":     l.gross_surplus,
                 "sale_price":  l.final_sale_price,
+                "sale_date":   l.sale_date,
                 "score":       l.score,
             }
             for l in leads[:5]
@@ -322,15 +408,14 @@ if __name__ == "__main__":
     import sys
 
     print("=" * 70)
-    print("  SurplusIQ — Data Loader Verification")
+    print("  SurplusIQ — Data Loader Verification (v2 with 14-day cutoff)")
     print("=" * 70)
     print(f"\n📂 Reading from: {RAW_DIR}\n")
 
     leads = load_all_leads()
     summary = get_summary(leads)
 
-    print(f"✓ Loaded {summary['total_leads']} qualifying leads")
-    print(f"✓ Total surplus identified: ${summary['total_surplus']:,.0f}\n")
+    print(f"\n✓ Total surplus identified: ${summary['total_surplus']:,.0f}\n")
 
     print("─" * 70)
     print("  BY STATE")
@@ -357,10 +442,10 @@ if __name__ == "__main__":
     print("─" * 70)
     for i, l in enumerate(summary["top_5_leads"], 1):
         print(f"  #{i}  ${l['surplus']:>11,.0f} | {l['score']:<3} | "
-              f"{l['county']}, {l['state']} | {l['case_number']}")
+              f"{l['county']}, {l['state']} | sold {l['sale_date']} | {l['case_number']}")
         if l['address']:
             print(f"       {l['address'][:60]}")
 
     print("\n" + "=" * 70)
-    print("  ✓ Data loader operational. Ready for Excel + dashboard build.")
+    print("  ✓ Data loader v2 operational. 14-day cutoff enforced.")
     print("=" * 70)

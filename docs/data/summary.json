@@ -1,15 +1,15 @@
 {
-  "generated_at": "2026-04-30T17:50:53",
-  "total_leads": 124,
-  "total_surplus": 10938652.33,
+  "generated_at": "2026-05-05T14:19:33",
+  "total_leads": 110,
+  "total_surplus": 10872109.3,
   "by_state": {
     "FL": {
-      "leads": 24,
-      "surplus": 1932896.3899999997
+      "leads": 33,
+      "surplus": 2855784.650000001
     },
     "OH": {
-      "leads": 100,
-      "surplus": 9005755.940000001
+      "leads": 77,
+      "surplus": 8016324.650000001
     }
   },
   "by_county": [
@@ -22,6 +22,14 @@
       "top_lead": 4500200.0
     },
     {
+      "county_id": "miami-dade-fl",
+      "county_name": "Miami-Dade",
+      "state": "FL",
+      "leads": 12,
+      "surplus": 1551798.74,
+      "top_lead": 310853.63
+    },
+    {
       "county_id": "hamilton-oh",
       "county_name": "Hamilton",
       "state": "OH",
@@ -30,36 +38,20 @@
       "top_lead": 105000.0
     },
     {
-      "county_id": "cuyahoga-oh",
-      "county_name": "Cuyahoga",
-      "state": "OH",
-      "leads": 22,
-      "surplus": 1141615.36,
-      "top_lead": 161217.92
-    },
-    {
-      "county_id": "miami-dade-fl",
-      "county_name": "Miami-Dade",
-      "state": "FL",
-      "leads": 6,
-      "surplus": 889109.12,
-      "top_lead": 310853.63
-    },
-    {
       "county_id": "broward-fl",
       "county_name": "Broward",
       "state": "FL",
-      "leads": 9,
-      "surplus": 714705.08,
-      "top_lead": 224104.51
+      "leads": 14,
+      "surplus": 920969.0000000003,
+      "top_lead": 213183.74000000022
     },
     {
-      "county_id": "franklin-oh",
-      "county_name": "Franklin",
+      "county_id": "cuyahoga-oh",
+      "county_name": "Cuyahoga",
       "state": "OH",
-      "leads": 18,
-      "surplus": 647133.24,
-      "top_lead": 74800.0
+      "leads": 17,
+      "surplus": 799317.3099999999,
+      "top_lead": 161217.92
     },
     {
       "county_id": "summit-oh",
@@ -70,27 +62,27 @@
       "top_lead": 150200.0
     },
     {
-      "county_id": "duval-fl",
-      "county_name": "Duval",
-      "state": "FL",
-      "leads": 5,
-      "surplus": 184678.59,
-      "top_lead": 84324.58
-    },
-    {
       "county_id": "lee-fl",
       "county_name": "Lee",
       "state": "FL",
+      "leads": 3,
+      "surplus": 282662.9,
+      "top_lead": 190515.08
+    },
+    {
+      "county_id": "duval-fl",
+      "county_name": "Duval",
+      "state": "FL",
       "leads": 4,
-      "surplus": 144403.59999999998,
-      "top_lead": 81884.99
+      "surplus": 100354.01,
+      "top_lead": 35189.46
     }
   ],
   "by_score": {
-    "A+": 14,
-    "A": 39,
-    "B": 36,
-    "C": 35
+    "A+": 18,
+    "A": 31,
+    "B": 29,
+    "C": 32
   },
   "top_5_leads": [
     {
@@ -100,6 +92,7 @@
       "address": "2210 ARBOR BLVD",
       "surplus": 4500200.0,
       "sale_price": 5000200.0,
+      "sale_date": "2026-04-28",
       "score": "A+"
     },
     {
@@ -109,33 +102,37 @@
       "address": "19195 NE 36 CT",
       "surplus": 310853.63,
       "sale_price": 338200.0,
-      "score": "A+"
-    },
-    {
-      "county": "Broward",
-      "state": "FL",
-      "case_number": "CACE-23-015282",
-      "address": "9490 NW 20 PL",
-      "surplus": 224104.51,
-      "sale_price": 403300.0,
+      "sale_date": "2026-05-03",
       "score": "A+"
     },
     {
       "county": "Miami-Dade",
       "state": "FL",
-      "case_number": "2024-004878-CA-01",
-      "address": "7328 W 29 LN",
-      "surplus": 211081.43,
-      "sale_price": 365100.0,
+      "case_number": "2017-021344-CA-01",
+      "address": "13857 SW 154 ST",
+      "surplus": 245919.85,
+      "sale_price": 437100.0,
+      "sale_date": "2026-05-04",
       "score": "A+"
     },
     {
       "county": "Broward",
       "state": "FL",
-      "case_number": "CACE-14-020395",
-      "address": "6290 BUENA VISTA DR",
-      "surplus": 166663.94,
-      "sale_price": 376900.0,
+      "case_number": "CACE-19-010632",
+      "address": "4101 SW 61 AVE",
+      "surplus": 213183.74000000022,
+      "sale_price": 3200100.0,
+      "sale_date": "2026-04-28",
+      "score": "A+"
+    },
+    {
+      "county": "Miami-Dade",
+      "state": "FL",
+      "case_number": "2022-014156-CA-01",
+      "address": "9790 WAYNE AVE",
+      "surplus": 195334.43000000005,
+      "sale_price": 751600.0,
+      "sale_date": "2026-05-03",
       "score": "A+"
     }
   ],
