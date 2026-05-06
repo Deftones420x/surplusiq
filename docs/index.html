@@ -495,7 +495,8 @@
             <th data-sort="address">Address</th>
             <th data-sort="final_sale_price" class="numeric">Sale Price</th>
             <th data-sort="opening_bid" class="numeric">Opening Bid</th>
-            <th data-sort="sale_date">Sale Date</th>
+            <th data-sort="sale_datetime">Sold At</th>
+            <th>Source</th>
             <th data-sort="sold_to">Sold To</th>
           </tr>
         </thead>
@@ -682,7 +683,8 @@
         <td>${cleanAddress(l.address) || "<span style='color:var(--text-muted)'>—</span>"}</td>
         <td class="numeric">${fmtMoney(l.final_sale_price)}</td>
         <td class="numeric">${fmtMoney(l.opening_bid)}</td>
-        <td>${fmtDate(l.sale_date)}</td>
+        <td>${l.sale_datetime || fmtDate(l.sale_date)}</td>
+                  <td>${l.source_url ? `<a href="${l.source_url}" target="_blank" rel="noopener" class="src-link">View</a>` : '—'}</td>
         <td>${l.sold_to || "—"}</td>
       </tr>
     `).join("");

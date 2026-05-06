@@ -85,8 +85,10 @@ class Lead:
 
     # Sale details
     sale_date:      str         # ISO format (YYYY-MM-DD) after normalization
+    sale_datetime:  str         # Full readable timestamp e.g. "May 4, 2026 9:02 AM ET"
     sold_to:        str
     is_third_party: bool
+    source_url:     str         # Direct link to the county auction page
 
     # Lead quality
     auction_status: str
@@ -123,6 +125,25 @@ def _latest_jsonl_for_county(county_id: str) -> Optional[Path]:
     pattern = f"{county_id}_*.jsonl"
     files = sorted(RAW_DIR.glob(pattern))
     return files[-1] if files else None
+
+
+def _extract_sale_datetime(record: dict) -> str:
+    """
+    Extract a human-readable timestamp like "May 4, 2026 9:02 AM ET" from the raw_text.
+    Returns empty string if not parseable.
+    """
+    raw = record.get("raw_text", "") or ""
+    m = re.search(r"(\d{1,2})/(\d{1,2})/(\d{4})\s+(\d{1,2}:\d{2})\s*(AM|PM)?\s*ET", raw, re.IGNORECASE)
+    if not m:
+        return ""
+    try:
+        mm, dd, yyyy = int(m.group(1)), int(m.group(2)), int(m.group(3))
+        time_str = m.group(4)
+        ampm = (m.group(5) or "").upper()
+        d = date(yyyy, mm, dd)
+        return f"{d.strftime('%b %-d, %Y')} {time_str} {ampm} ET".strip()
+    except (ValueError, AttributeError):
+        return ""
 
 
 def _normalize_address(raw: str) -> str:
@@ -195,7 +216,9 @@ def _parse_lead(record: dict, county_id: str, source_file: str) -> Optional[Lead
         gross_surplus = surplus,
         assessed_value   = assessed,
         sale_date     = sale_date_iso,
+        sale_datetime = _extract_sale_datetime(record),
         sold_to       = (record.get("sold_to") or "").strip(),
+        source_url    = (record.get("source_url") or "").strip(),
         is_third_party = bool(record.get("is_third_party", False)),
         auction_status = (record.get("auction_status") or "").strip(),
         scraped_at    = datetime.now().isoformat(timespec="seconds"),
