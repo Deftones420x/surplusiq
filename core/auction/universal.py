@@ -274,6 +274,24 @@ class UniversalAuctionScraper:
         if len(text) < 30:
             return None
 
+        # STRICT DATE GUARD: require "Auction Sold MM/DD/YYYY" matching URL date
+        sold_ts_match = re.search(
+            r"Auction\s+(?:Sold|Redeemed)\s*\n?\s*(\d{1,2})/(\d{1,2})/(\d{4})",
+            text, re.IGNORECASE
+        )
+        if not sold_ts_match:
+            return None
+        try:
+            actual_sale_date = date(
+                int(sold_ts_match.group(3)),
+                int(sold_ts_match.group(1)),
+                int(sold_ts_match.group(2)),
+            )
+        except ValueError:
+            return None
+        if auction_date and actual_sale_date != auction_date:
+            return None
+
         # Status detection — check for explicit "Auction Sold" heading FIRST
         # (Cuyahoga/Ohio uses "Auction Sold" as section heading, with "Case Status: ACTIVE" elsewhere)
         if "Auction Sold" in text:
@@ -378,7 +396,7 @@ class UniversalAuctionScraper:
             "is_third_party":    is_third_party(sold_to),
             "parcel_id":         parcel.strip(),
             "address":           address,
-            "auction_date":      auction_date.isoformat() if auction_date else date.today().isoformat(),
+            "auction_date":      actual_sale_date.isoformat(),
             "scraped_at":        datetime.now().isoformat(),
             "source_url":        self.build_preview_url(auction_date),
             "raw_text":          text[:800],
@@ -457,7 +475,7 @@ class UniversalAuctionScraper:
                 "gross_surplus":     final - opening,
                 "sold_to":           "",
                 "is_third_party":    False,  # Unknown from regex
-                "auction_date":      auction_date.isoformat() if auction_date else date.today().isoformat(),
+                "auction_date":      actual_sale_date.isoformat(),
                 "scraped_at":        datetime.now().isoformat(),
                 "extraction_method": "regex",
             })
