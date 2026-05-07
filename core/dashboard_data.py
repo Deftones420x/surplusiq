@@ -44,9 +44,11 @@ def export_dashboard_data():
             "gross_surplus":    l.gross_surplus,
             "assessed_value":   l.assessed_value,
             "sale_date":        l.sale_date,
+            "sale_datetime":    getattr(l, "sale_datetime", ""),
             "sold_to":          l.sold_to,
             "auction_status":   l.auction_status,
             "score":            l.score,
+            "source_url":       getattr(l, "source_url", ""),
         })
 
     leads_file = docs_data / "leads.json"

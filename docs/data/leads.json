@@ -12,9 +12,11 @@
     "gross_surplus": 245919.85,
     "assessed_value": 139429.0,
     "sale_date": "2026-05-04",
+    "sale_datetime": "May 4, 2026 09:08 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://www.miamidade.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/04/2026"
   },
   {
     "county_id": "broward-fl",
@@ -29,9 +31,11 @@
     "gross_surplus": 213183.74000000022,
     "assessed_value": 0.0,
     "sale_date": "2026-04-28",
+    "sale_datetime": "Apr 28, 2026 10:01 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/28/2026"
   },
   {
     "county_id": "lee-fl",
@@ -46,9 +50,11 @@
     "gross_surplus": 190515.08,
     "assessed_value": 404226.0,
     "sale_date": "2026-04-30",
+    "sale_datetime": "Apr 30, 2026 09:22 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://www.lee.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/30/2026"
   },
   {
     "county_id": "broward-fl",
@@ -63,9 +69,11 @@
     "gross_surplus": 155778.86,
     "assessed_value": 0.0,
     "sale_date": "2026-04-24",
+    "sale_datetime": "Apr 24, 2026 10:35 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/24/2026"
   },
   {
     "county_id": "miami-dade-fl",
@@ -80,9 +88,11 @@
     "gross_surplus": 133174.06,
     "assessed_value": 324386.0,
     "sale_date": "2026-05-05",
+    "sale_datetime": "May 5, 2026 10:15 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://www.miamidade.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW"
   },
   {
     "county_id": "miami-dade-fl",
@@ -97,9 +107,11 @@
     "gross_surplus": 128742.35999999999,
     "assessed_value": 54624.0,
     "sale_date": "2026-05-05",
+    "sale_datetime": "May 5, 2026 09:50 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://www.miamidade.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW"
   },
   {
     "county_id": "miami-dade-fl",
@@ -114,9 +126,11 @@
     "gross_surplus": 112930.83000000002,
     "assessed_value": 351983.0,
     "sale_date": "2026-04-29",
+    "sale_datetime": "Apr 29, 2026 09:09 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A+"
+    "score": "A+",
+    "source_url": "https://www.miamidade.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/29/2026"
   },
   {
     "county_id": "summit-oh",
@@ -131,9 +145,11 @@
     "gross_surplus": 96709.34,
     "assessed_value": 0.0,
     "sale_date": "2026-05-05",
+    "sale_datetime": "May 5, 2026 10:08 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://summit.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW"
   },
   {
     "county_id": "broward-fl",
@@ -148,9 +164,11 @@
     "gross_surplus": 87542.16,
     "assessed_value": 0.0,
     "sale_date": "2026-05-01",
+    "sale_datetime": "May 1, 2026 10:18 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/01/2026"
   },
   {
     "county_id": "montgomery-oh",
@@ -165,9 +183,11 @@
     "gross_surplus": 80100.0,
     "assessed_value": 0.0,
     "sale_date": "2026-05-01",
+    "sale_datetime": "May 1, 2026 09:09 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://montgomery.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/01/2026"
   },
   {
     "county_id": "hamilton-oh",
@@ -182,9 +202,11 @@
     "gross_surplus": 71600.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-22",
+    "sale_datetime": "Apr 22, 2026 11:53 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://hamilton.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/22/2026"
   },
   {
     "county_id": "broward-fl",
@@ -199,9 +221,11 @@
     "gross_surplus": 63481.630000000005,
     "assessed_value": 0.0,
     "sale_date": "2026-05-05",
+    "sale_datetime": "May 5, 2026 10:47 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW"
   },
   {
     "county_id": "montgomery-oh",
@@ -216,9 +240,11 @@
     "gross_surplus": 62500.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-24",
+    "sale_datetime": "Apr 24, 2026 09:11 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://montgomery.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/24/2026"
   },
   {
     "county_id": "miami-dade-fl",
@@ -233,9 +259,11 @@
     "gross_surplus": 57737.59999999998,
     "assessed_value": 310721.0,
     "sale_date": "2026-04-27",
+    "sale_datetime": "Apr 27, 2026 09:06 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://www.miamidade.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/27/2026"
   },
   {
     "county_id": "cuyahoga-oh",
@@ -250,9 +278,11 @@
     "gross_surplus": 55100.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-27",
+    "sale_datetime": "Apr 27, 2026 09:01 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://cuyahoga.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/27/2026"
   },
   {
     "county_id": "cuyahoga-oh",
@@ -267,9 +297,11 @@
     "gross_surplus": 53866.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-27",
+    "sale_datetime": "Apr 27, 2026 09:21 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "A"
+    "score": "A",
+    "source_url": "https://cuyahoga.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/27/2026"
   },
   {
     "county_id": "orange-fl",
@@ -284,9 +316,11 @@
     "gross_surplus": 47572.05000000005,
     "assessed_value": 331673.0,
     "sale_date": "2026-05-05",
+    "sale_datetime": "May 5, 2026 11:12 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "B"
+    "score": "B",
+    "source_url": "https://myorangeclerk.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW"
   },
   {
     "county_id": "montgomery-oh",
@@ -301,9 +335,11 @@
     "gross_surplus": 47100.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-24",
+    "sale_datetime": "Apr 24, 2026 09:22 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "B"
+    "score": "B",
+    "source_url": "https://montgomery.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/24/2026"
   },
   {
     "county_id": "hamilton-oh",
@@ -318,9 +354,11 @@
     "gross_surplus": 39400.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-22",
+    "sale_datetime": "Apr 22, 2026 11:11 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "B"
+    "score": "B",
+    "source_url": "https://hamilton.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/22/2026"
   },
   {
     "county_id": "summit-oh",
@@ -335,9 +373,11 @@
     "gross_surplus": 33177.84,
     "assessed_value": 0.0,
     "sale_date": "2026-05-01",
+    "sale_datetime": "May 1, 2026 10:05 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "B"
+    "score": "B",
+    "source_url": "https://summit.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/01/2026"
   },
   {
     "county_id": "broward-fl",
@@ -352,9 +392,11 @@
     "gross_surplus": 28436.45,
     "assessed_value": 0.0,
     "sale_date": "2026-05-05",
+    "sale_datetime": "May 5, 2026 11:05 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "B"
+    "score": "B",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW"
   },
   {
     "county_id": "summit-oh",
@@ -369,9 +411,11 @@
     "gross_surplus": 23100.0,
     "assessed_value": 0.0,
     "sale_date": "2026-05-01",
+    "sale_datetime": "May 1, 2026 10:18 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://summit.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/01/2026"
   },
   {
     "county_id": "hamilton-oh",
@@ -386,9 +430,11 @@
     "gross_surplus": 20800.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-22",
+    "sale_datetime": "Apr 22, 2026 11:41 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://hamilton.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/22/2026"
   },
   {
     "county_id": "broward-fl",
@@ -403,9 +449,11 @@
     "gross_surplus": 17303.68,
     "assessed_value": 0.0,
     "sale_date": "2026-04-24",
+    "sale_datetime": "Apr 24, 2026 10:25 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/24/2026"
   },
   {
     "county_id": "montgomery-oh",
@@ -420,9 +468,11 @@
     "gross_surplus": 17000.0,
     "assessed_value": 0.0,
     "sale_date": "2026-05-01",
+    "sale_datetime": "May 1, 2026 09:02 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://montgomery.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/01/2026"
   },
   {
     "county_id": "broward-fl",
@@ -437,9 +487,11 @@
     "gross_surplus": 16629.68,
     "assessed_value": 0.0,
     "sale_date": "2026-04-23",
+    "sale_datetime": "Apr 23, 2026 10:17 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/23/2026"
   },
   {
     "county_id": "cuyahoga-oh",
@@ -454,9 +506,11 @@
     "gross_surplus": 12766.0,
     "assessed_value": 0.0,
     "sale_date": "2026-05-04",
+    "sale_datetime": "May 4, 2026 09:05 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://cuyahoga.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=05/04/2026"
   },
   {
     "county_id": "broward-fl",
@@ -471,9 +525,11 @@
     "gross_surplus": 10437.529999999999,
     "assessed_value": 0.0,
     "sale_date": "2026-04-28",
+    "sale_datetime": "Apr 28, 2026 10:03 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://broward.realforeclose.com/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/28/2026"
   },
   {
     "county_id": "franklin-oh",
@@ -488,8 +544,10 @@
     "gross_surplus": 10400.0,
     "assessed_value": 0.0,
     "sale_date": "2026-04-24",
+    "sale_datetime": "Apr 24, 2026 09:07 AM ET",
     "sold_to": "3rd Party Bidder",
     "auction_status": "Sold",
-    "score": "C"
+    "score": "C",
+    "source_url": "https://franklin.sheriffsaleauction.ohio.gov/index.cfm?zaction=AUCTION&Zmethod=PREVIEW&AUCTIONDATE=04/24/2026"
   }
 ]
