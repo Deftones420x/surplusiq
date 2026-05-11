@@ -2,10 +2,8 @@ name: Daily Refresh
 
 on:
   schedule:
-    # 11:00 UTC = 6:00 AM CST (UTC-5) / 6:00 AM CDT runs at 11:00 UTC during standard time
-    # NOTE: During CDT (UTC-5 daylight), this fires at 6:00 AM CT.
-    # During CST (UTC-6 standard), this fires at 5:00 AM CT.
-    # GitHub Actions schedules are UTC only and do not observe DST.
+    # 6:00 AM Central Time = 11:00 UTC (CDT) / 12:00 UTC (CST)
+    # Using 11:00 UTC to favor the active daylight saving period
     - cron: '0 11 * * *'
   workflow_dispatch:
 
@@ -18,72 +16,56 @@ jobs:
     timeout-minutes: 30
 
     steps:
-      - name: Checkout repository
+      - name: Checkout repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: 'pip'
+          cache: pip
 
-      - name: Install Python dependencies
+      - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Install Playwright Chromium
-        run: |
-          python -m playwright install --with-deps chromium
+        run: python -m playwright install --with-deps chromium
 
       - name: Run auction scrapers (all 10 counties)
-        id: scrapers
-        run: |
-          python run.py
-        continue-on-error: false
+        id: scrape
+        run: python -m core.auction.universal --all --days=14
 
       - name: Run Cuyahoga docket enrichment
         id: dockets
-        run: |
-          python -m core.dockets.enrich cuyahoga-oh
-        continue-on-error: false
+        if: success()
+        run: python -m core.dockets.enrich cuyahoga-oh
+        continue-on-error: true
 
-      - name: Regenerate dashboard data
+      - name: Export dashboard data
         id: dashboard
-        run: |
-          python -m core.dashboard_data
-        continue-on-error: false
-
-      - name: Show what changed
-        run: |
-          echo "===== git status ====="
-          git status
-          echo "===== docs/data diff summary ====="
-          git diff --stat docs/data/ data/ || true
+        if: success()
+        run: python -m core.dashboard_data
 
       - name: Commit and push refreshed data
+        if: success()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          git add docs/data/ data/
-
+          git add docs/data/ data/raw/ data/dockets/ 2>/dev/null || true
           if git diff --cached --quiet; then
             echo "No changes to commit."
-            exit 0
+          else
+            git commit -m "Daily refresh $(date -u +'%Y-%m-%d')"
+            git push
           fi
 
-          DATESTAMP=$(date -u +'%Y-%m-%d')
-          git commit -m "Daily refresh ${DATESTAMP}"
-          git push origin HEAD:${GITHUB_REF#refs/heads/}
-
-      - name: Report failure summary
+      - name: Report failure
         if: failure()
         run: |
           echo "::error::Daily refresh failed. Check the step logs above."
-          echo "Scraper step outcome:   ${{ steps.scrapers.outcome }}"
+          echo "Scraper step outcome:   ${{ steps.scrape.outcome }}"
           echo "Docket step outcome:    ${{ steps.dockets.outcome }}"
           echo "Dashboard step outcome: ${{ steps.dashboard.outcome }}"
+          exit 1
