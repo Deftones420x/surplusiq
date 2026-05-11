@@ -577,6 +577,35 @@
     return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
   };
   const cleanAddress = (s) => (s || "").replace(/^Property Address:\s*/i, "").trim();
+  function renderSurplusCell(l) {
+    const apparent = l.gross_surplus || 0;
+    const trueSur = (l.true_surplus !== undefined && l.true_surplus !== null && l.true_surplus !== 0)
+                    ? l.true_surplus
+                    : apparent;
+    const cls = trueSur < 0 ? 'negative' : 'positive';
+    const trueStr = fmtMoney(trueSur);
+    const showApparent = Math.abs(apparent - trueSur) > 100;
+    return '<span class="surplus-true ' + cls + '">' + trueStr + '</span>' +
+           (showApparent ? '<span class="surplus-apparent">apparent ' + fmtMoney(apparent) + '</span>' : '');
+  }
+
+  function renderStatusBadge(l) {
+    const cls = (l.classification || '').toLowerCase();
+    if (!cls) return '<span class="status-badge status-none" title="No docket data yet">—</span>';
+    const labels = {
+      green:   '✓ Confirmed',
+      yellow:  'Pending',
+      red:     '⚠ At Risk',
+      killed:  '✗ Killed',
+      unknown: '?'
+    };
+    const label = labels[cls] || cls;
+    const reason = (l.classification_reason || '').replace(/"/g, '&quot;');
+    const signals = (l.kill_signals || []).join(', ');
+    const tooltip = reason + (signals ? ' — signals: ' + signals : '');
+    return '<span class="status-badge status-' + cls + '" title="' + tooltip + '">' + label + '</span>';
+  }
+
   const scoreBadgeClass = (score) => ({
     "A+": "badge-aplus",
     "A":  "badge-a",
