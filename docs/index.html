@@ -531,7 +531,7 @@
       <table>
         <thead>
           <tr>
-            <th data-sort="true_surplus" class="numeric sorted-desc">Surplus</th>
+            <th data-sort="best_real_surplus" class="numeric sorted-desc">Surplus</th>
             <th data-sort="classification">Status</th>
             <th data-sort="score">Tier</th>
             <th data-sort="county_name">County</th>
@@ -541,12 +541,14 @@
             <th data-sort="final_sale_price" class="numeric">Sale Price</th>
             <th data-sort="opening_bid" class="numeric">Opening Bid</th>
             <th data-sort="sale_datetime">Sold At</th>
+            <th data-sort="pr_owner_name">Owner</th>
+            <th data-sort="real_surplus_source">Verified By</th>
             <th>Source</th>
             <th data-sort="sold_to">Sold To</th>
           </tr>
         </thead>
         <tbody id="leads-body">
-          <tr><td colspan="11" class="loading">Loading leads…</td></tr>
+          <tr><td colspan="13" class="loading">Loading leads…</td></tr>
         </tbody>
       </table>
     </div>
@@ -564,7 +566,7 @@
   let LEADS = [];
   let SUMMARY = null;
   let filtered = [];
-  let sortKey = "gross_surplus";
+  let sortKey = "best_real_surplus";
   let sortDir = "desc";
 
   // ─── Helpers ──────────────────────────────────────────
@@ -579,13 +581,13 @@
   const cleanAddress = (s) => (s || "").replace(/^Property Address:\s*/i, "").trim();
   function renderSurplusCell(l) {
     const apparent = l.gross_surplus || 0;
-    const trueSur = (l.true_surplus !== undefined && l.true_surplus !== null && l.true_surplus !== 0)
-                    ? l.true_surplus
-                    : apparent;
-    const cls = trueSur < 0 ? 'negative' : 'positive';
-    const trueStr = fmtMoney(trueSur);
-    const showApparent = Math.abs(apparent - trueSur) > 100;
-    return '<span class="surplus-true ' + cls + '">' + trueStr + '</span>' +
+    const best = (l.best_real_surplus !== undefined && l.best_real_surplus !== null)
+                  ? l.best_real_surplus
+                  : apparent;
+    const cls = best < 0 ? 'negative' : 'positive';
+    const bestStr = fmtMoney(best);
+    const showApparent = Math.abs(apparent - best) > 100;
+    return '<span class="surplus-true ' + cls + '">' + bestStr + '</span>' +
            (showApparent ? '<span class="surplus-apparent">apparent ' + fmtMoney(apparent) + '</span>' : '');
   }
 
@@ -604,6 +606,17 @@
     const signals = (l.kill_signals || []).join(', ');
     const tooltip = reason + (signals ? ' — signals: ' + signals : '');
     return '<span class="status-badge status-' + cls + '" title="' + tooltip + '">' + label + '</span>';
+  }
+
+  function renderSourceBadge(l) {
+    const src = l.real_surplus_source || 'apparent';
+    const labels = {
+      'docket':        { txt: '⚖ Docket',  cls: 'status-green',  tip: 'Court-verified via docket scrape' },
+      'propertyradar': { txt: '🏠 PR',    cls: 'status-yellow', tip: 'PropertyRadar enriched (loan balance, equity)' },
+      'apparent':      { txt: 'Auction',         cls: 'status-none',   tip: 'Auction-only data, no enrichment yet' }
+    };
+    const info = labels[src] || labels.apparent;
+    return '<span class="status-badge ' + info.cls + '" title="' + info.tip + '">' + info.txt + '</span>';
   }
 
   const scoreBadgeClass = (score) => ({
@@ -626,7 +639,7 @@
     } catch (err) {
       console.error(err);
       $("leads-body").innerHTML =
-        `<tr><td colspan="11"><div class="error">Failed to load lead data: ${err.message}</div></td></tr>`;
+        `<tr><td colspan="13"><div class="error">Failed to load lead data: ${err.message}</div></td></tr>`;
     }
   }
 
@@ -743,7 +756,7 @@
     $("results-count").textContent = filtered.length.toLocaleString();
 
     if (!filtered.length) {
-      tbody.innerHTML = `<tr><td colspan="11" class="loading">No leads match your filters.</td></tr>`;
+      tbody.innerHTML = `<tr><td colspan="13" class="loading">No leads match your filters.</td></tr>`;
       return;
     }
 
@@ -759,6 +772,8 @@
         <td class="numeric">${fmtMoney(l.final_sale_price)}</td>
         <td class="numeric">${fmtMoney(l.opening_bid)}</td>
         <td>${l.sale_datetime || fmtDate(l.sale_date)}</td>
+        <td>${l.pr_owner_name ? `<span class="owner-name">${l.pr_owner_name}</span>` : '<span style="color:var(--text-muted)">—</span>'}</td>
+        <td>${renderSourceBadge(l)}</td>
                   <td>${l.source_url ? `<a href="${l.source_url}" target="_blank" rel="noopener" class="src-link">View</a>` : '—'}</td>
         <td>${l.sold_to || "—"}</td>
       </tr>

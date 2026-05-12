@@ -1,4 +1,5 @@
 {
+<<<<<<< Updated upstream
   "generated_at": "2026-05-12T16:22:00",
   "total_leads": 34,
   "total_surplus": 3102509.0400000005,
@@ -10,6 +11,22 @@
     "OH": {
       "leads": 14,
       "surplus": 558164.3699999999
+=======
+  "generated_at": "2026-05-12T11:59:51",
+  "total_leads": 17,
+  "total_surplus": 1524788.9200000002,
+  "total_real_surplus": 5467095.04,
+  "pr_matched_count": 15,
+  "docket_matched_count": 2,
+  "by_state": {
+    "FL": {
+      "leads": 11,
+      "surplus": 1261935.74
+    },
+    "OH": {
+      "leads": 6,
+      "surplus": 262853.18
+>>>>>>> Stashed changes
     }
   },
   "by_county": [
@@ -17,9 +34,15 @@
       "county_id": "miami-dade-fl",
       "county_name": "Miami-Dade",
       "state": "FL",
+<<<<<<< Updated upstream
       "leads": 7,
       "surplus": 1281771.7900000003,
       "top_lead": 330522.67000000004
+=======
+      "leads": 4,
+      "surplus": 620767.1000000001,
+      "top_lead": 245919.85
+>>>>>>> Stashed changes
     },
     {
       "county_id": "broward-fl",
@@ -46,6 +69,7 @@
       "top_lead": 96709.34
     },
     {
+<<<<<<< Updated upstream
       "county_id": "cuyahoga-oh",
       "county_name": "Cuyahoga",
       "state": "OH",
@@ -54,6 +78,8 @@
       "top_lead": 85313.51000000001
     },
     {
+=======
+>>>>>>> Stashed changes
       "county_id": "montgomery-oh",
       "county_name": "Montgomery",
       "state": "OH",
@@ -70,6 +96,7 @@
       "top_lead": 47572.05000000005
     },
     {
+<<<<<<< Updated upstream
       "county_id": "franklin-oh",
       "county_name": "Franklin",
       "state": "OH",
@@ -83,6 +110,21 @@
     "A": 8,
     "B": 5,
     "C": 9
+=======
+      "county_id": "cuyahoga-oh",
+      "county_name": "Cuyahoga",
+      "state": "OH",
+      "leads": 1,
+      "surplus": 12766.0,
+      "top_lead": 12766.0
+    }
+  ],
+  "by_score": {
+    "A+": 6,
+    "A": 4,
+    "B": 3,
+    "C": 4
+>>>>>>> Stashed changes
   },
   "top_5_leads": [
     {

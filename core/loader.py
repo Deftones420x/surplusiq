@@ -24,7 +24,7 @@ from __future__ import annotations
 import json
 import os
 import re
-from dataclasses import dataclass, asdict, field
+from dataclasses import dataclass, field, asdict, field
 from datetime import datetime, date, timedelta
 from pathlib import Path
 from typing import Optional
@@ -64,6 +64,69 @@ COUNTY_INFO = {
 # ═══════════════════════════════════════════════════════════════════════
 # Lead data structure
 # ═══════════════════════════════════════════════════════════════════════
+
+
+def _load_docket_data() -> dict:
+    """
+    Load all docket scraper results from data/dockets/ into a lookup dict.
+    Returns: { (county_id, normalized_case_number): docket_result_dict }
+    """
+    import json as _json
+    docket_dir = PROJECT_ROOT / "data" / "dockets"
+    if not docket_dir.exists():
+        return {}
+
+    lookup = {}
+    # Walk every .jsonl file in data/dockets/
+    for jsonl in sorted(docket_dir.glob("*.jsonl")):
+        try:
+            with open(jsonl) as f:
+                for line in f:
+                    line = line.strip()
+                    if not line:
+                        continue
+                    try:
+                        d = _json.loads(line)
+                    except _json.JSONDecodeError:
+                        continue
+                    cid = d.get("county_id", "")
+                    case = d.get("case_number", "")
+                    if not cid or not case:
+                        continue
+                    # Normalize: strip "(NNNNN)" auction suffix and whitespace
+                    norm = re.sub(r"\s*\([^)]*\)\s*$", "", case).strip().upper()
+                    lookup[(cid, norm)] = d
+        except Exception:
+            continue
+    return lookup
+
+
+def _normalize_case_for_lookup(case_number: str) -> str:
+    """Strip the auction suffix '(NNNNN)' from case numbers for matching."""
+    return re.sub(r"\s*\([^)]*\)\s*$", "", case_number).strip().upper()
+
+
+def _apply_docket_to_lead(lead, docket: dict, county_id: str) -> None:
+    """Merge a docket result onto a Lead in place."""
+    lead.classification       = docket.get("classification", "") or ""
+    lead.classification_reason = docket.get("classification_reason", "") or ""
+    lead.prayer_amount        = float(docket.get("prayer_amount", 0.0) or 0.0)
+    lead.kill_signals         = list(docket.get("kill_signals", []) or [])
+    lead.proof_of_surplus     = docket.get("proof_of_surplus", "") or ""
+    lead.competing_filers     = list(docket.get("competing_filers", []) or [])
+    lead.additional_parties   = list(docket.get("additional_parties", []) or [])
+    lead.docket_url           = docket.get("case_url", "") or ""
+
+    # Calculate true_surplus
+    # Ohio: opening_bid is fake (2/3 appraised), use prayer_amount
+    # Florida: opening_bid IS the real debt, so true_surplus = gross_surplus
+    if lead.state == "OH" and lead.prayer_amount > 0:
+        lead.true_surplus = round(lead.final_sale_price - lead.prayer_amount, 2)
+    else:
+        lead.true_surplus = lead.gross_surplus
+
+
+
 @dataclass
 class Lead:
     # Identity
@@ -90,6 +153,7 @@ class Lead:
     is_third_party: bool
     source_url:     str         # Direct link to the county auction page
 
+
     # Lead quality
     auction_status: str
 
@@ -113,6 +177,17 @@ class Lead:
     # Claim status
     claim_filed:        bool   = False
     claim_status:       str    = "Unknown"
+
+    # Docket-enrichment fields (populated when docket scraper has run on this case)
+    classification:   str = ""
+    classification_reason: str = ""
+    prayer_amount:    float = 0.0
+    true_surplus:     float = 0.0
+    kill_signals:     list = field(default_factory=list)
+    proof_of_surplus: str = ""
+    competing_filers: list = field(default_factory=list)
+    additional_parties: list = field(default_factory=list)
+    docket_url:       str = ""
 
     def to_dict(self) -> dict:
         return asdict(self)
@@ -285,6 +360,9 @@ def load_all_leads(
     Returns:
         List of Lead objects, sorted by gross_surplus descending.
     """
+    # Load docket scraper results once for the whole run
+    _docket_lookup = _load_docket_data()
+
     target_counties = counties or list(COUNTY_INFO.keys())
     today = date.today()
     cutoff = today - timedelta(days=window_days)
@@ -344,6 +422,13 @@ def load_all_leads(
                 # Score and keep
                 lead.score, lead.score_reason = _score_lead(lead)
                 stats[county_id]["kept"] += 1
+                # Merge docket-scraper data if available
+                _norm = _normalize_case_for_lookup(lead.case_number)
+                _docket = _docket_lookup.get((lead.county_id, _norm))
+                if _docket:
+                    _apply_docket_to_lead(lead, _docket, lead.county_id)
+                else:
+                    lead.true_surplus = lead.gross_surplus
                 leads.append(lead)
 
     leads.sort(key=lambda x: x.gross_surplus, reverse=True)
