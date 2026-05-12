@@ -2,8 +2,8 @@ name: Daily Refresh
 
 on:
   schedule:
-    # 6:00 AM Central Time = 11:00 UTC (CDT) / 12:00 UTC (CST)
-    # Using 11:00 UTC to favor the active daylight saving period
+    # 11:00 UTC = 6:00 AM CDT / 5:00 AM CST
+    # GitHub Actions cron is UTC only; does not observe DST.
     - cron: '0 11 * * *'
   workflow_dispatch:
 
@@ -13,76 +13,98 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 120
 
     steps:
-      - name: Checkout repo
+      - name: Checkout repository
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Python 3.12
         uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-          cache: pip
+          cache: 'pip'
 
-      - name: Install dependencies
+      - name: Install Python dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
       - name: Install Playwright Chromium
-        run: python -m playwright install --with-deps chromium
+        run: |
+          python -m playwright install --with-deps chromium
 
-      - name: Install xvfb (virtual display for CAPTCHA-flagged counties)
-        run: sudo apt-get install -y xvfb
+      - name: Install xvfb for headed-mode CAPTCHA counties
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y xvfb
 
-      - name: Run auction scrapers (all 10 counties under xvfb)
-        id: scrape
-        run: xvfb-run -a python -m core.auction.universal --all --days=14
+      - name: Run auction scrapers (all 10 counties)
+        id: scrapers
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x800x24" \
+            python -m core.auction.universal --all --days=14
+        continue-on-error: false
 
-      - name: Run Cuyahoga docket enrichment (under xvfb)
+      - name: Run Cuyahoga docket enrichment
         id: dockets
-        if: success()
-        run: xvfb-run -a python -m core.dockets.enrich cuyahoga-oh
+        run: |
+          xvfb-run -a --server-args="-screen 0 1280x800x24" \
+            python -m core.dockets.enrich cuyahoga-oh
         continue-on-error: true
 
-      - name: Export dashboard data
+      - name: Run PropertyRadar enrichment
+        id: pr_enrich
+        timeout-minutes: 10
+        env:
+          PROPERTYRADAR_TOKEN: ${{ secrets.PROPERTYRADAR_TOKEN }}
+        run: |
+          # Cap at 50 leads/day to bound cost at ~$0.50/day worst case.
+          # `yes |` auto-confirms the interactive "Continue? (y/N)" prompt.
+          # If this step fails or hits the cost cap, we still regenerate the
+          # dashboard using whatever PR data was previously cached.
+          yes | python -m core.enrichment.propertyradar --top 50 || echo "::warning::PR enrichment step had issues — continuing with existing enriched data"
+        continue-on-error: true
+
+      - name: Regenerate dashboard data
         id: dashboard
-        if: success()
-        run: python -m core.dashboard_data
+        run: |
+          python -m core.dashboard_data
+        continue-on-error: false
+
+      - name: Show what changed
+        run: |
+          echo "===== git status ====="
+          git status
+          echo "===== docs/data diff summary ====="
+          git diff --stat docs/data/ data/ || true
 
       - name: Commit and push refreshed data
-        if: success()
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
-          echo "=== Files in docs/data/ ==="
-          ls -la docs/data/ || echo "(no docs/data/ directory)"
-
-          echo "=== Git status before add ==="
-          git status
-
-          echo "=== Adding docs/data/ ==="
-          git add docs/data/
-
-          echo "=== Git status after add ==="
-          git status
+          # Stage the data we care about. PR enrichment writes to data/enriched/
+          # so we include that too.
+          git add docs/data/ data/dockets/ data/enriched/ data/raw/ 2>/dev/null || true
 
           if git diff --cached --quiet; then
-            echo "No staged changes after add. Nothing to commit."
-          else
-            echo "=== Staged changes detected. Committing ==="
-            git commit -m "Daily refresh $(date -u +'%Y-%m-%d %H:%M:%S UTC')"
-            git push
-            echo "=== Push complete ==="
+            echo "No changes to commit."
+            exit 0
           fi
 
-      - name: Report failure
+          DATESTAMP=$(date -u +'%Y-%m-%d %H:%M:%S UTC')
+          git commit -m "Daily refresh ${DATESTAMP}"
+          git push origin HEAD:${GITHUB_REF#refs/heads/}
+
+      - name: Report failure summary
         if: failure()
         run: |
           echo "::error::Daily refresh failed. Check the step logs above."
-          echo "Scraper step outcome:   ${{ steps.scrape.outcome }}"
-          echo "Docket step outcome:    ${{ steps.dockets.outcome }}"
-          echo "Dashboard step outcome: ${{ steps.dashboard.outcome }}"
-          exit 1
+          echo "Scraper step outcome:    ${{ steps.scrapers.outcome }}"
+          echo "Docket step outcome:     ${{ steps.dockets.outcome }}"
+          echo "PR enrich step outcome:  ${{ steps.pr_enrich.outcome }}"
+          echo "Dashboard step outcome:  ${{ steps.dashboard.outcome }}"
