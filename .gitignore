@@ -1,7 +1,39 @@
-.venv/
-.env
+# Python
 __pycache__/
 *.pyc
+*.pyo
+*.pyd
+.Python
+*.egg-info/
+.pytest_cache/
+
+# Virtual environments
+.venv/
+venv/
+env/
+
+# IDE / editor
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
 .DS_Store
-data/*.jsonl
-output/*.xlsx
+
+# Backup files we generate during iteration
+*.bak
+*.bak_*
+*.bak[0-9]*
+
+# One-off test/patch scripts that shouldn't ship
+pr_test*.py
+pr_live_test.py
+loader_docket_patch*.py
+
+# Diagnostic screenshots — generated fresh on every scraper run
+data/diagnostics/
+
+# Local environment file with secrets
+.env
+.env.local
