@@ -13,7 +13,7 @@ permissions:
 jobs:
   refresh:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 45
 
     steps:
       - name: Checkout repo
@@ -33,14 +33,17 @@ jobs:
       - name: Install Playwright Chromium
         run: python -m playwright install --with-deps chromium
 
-      - name: Run auction scrapers (all 10 counties)
-        id: scrape
-        run: python -m core.auction.universal --all --days=14
+      - name: Install xvfb (virtual display for CAPTCHA-flagged counties)
+        run: sudo apt-get install -y xvfb
 
-      - name: Run Cuyahoga docket enrichment
+      - name: Run auction scrapers (all 10 counties under xvfb)
+        id: scrape
+        run: xvfb-run -a python -m core.auction.universal --all --days=14
+
+      - name: Run Cuyahoga docket enrichment (under xvfb)
         id: dockets
         if: success()
-        run: python -m core.dockets.enrich cuyahoga-oh
+        run: xvfb-run -a python -m core.dockets.enrich cuyahoga-oh
         continue-on-error: true
 
       - name: Export dashboard data
