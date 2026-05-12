@@ -1,10 +1,11 @@
 {
-  "generated_at": "2026-05-12T12:06:35",
+  "generated_at": "2026-05-12T12:13:18",
   "total_leads": 17,
-  "total_surplus": 1524788.9200000002,
-  "total_real_surplus": 5467095.04,
+  "total_surplus": 5568235.19,
+  "total_apparent_surplus": 1524788.9200000002,
+  "total_real_surplus": 5568235.19,
   "pr_matched_count": 15,
-  "docket_matched_count": 2,
+  "docket_matched_count": 1,
   "by_state": {
     "FL": {
       "leads": 11,
@@ -81,54 +82,49 @@
   },
   "top_5_leads": [
     {
-      "county": "Miami-Dade",
-      "state": "FL",
-      "case_number": "2017-021344-CA-01",
-      "address": "13857 SW 154 ST",
-      "surplus": 245919.85,
-      "sale_price": 437100.0,
-      "sale_date": "2026-05-04",
-      "score": "A+"
-    },
-    {
       "county": "Broward",
       "state": "FL",
       "case_number": "CACE-19-010632",
       "address": "4101 SW 61 AVE",
-      "surplus": 213183.74000000022,
-      "sale_price": 3200100.0,
-      "sale_date": "2026-04-28",
-      "score": "A+"
+      "surplus": 3080383.0,
+      "apparent": 213183.74000000022,
+      "source": "propertyradar"
     },
     {
-      "county": "Lee",
+      "county": "Orange",
       "state": "FL",
-      "case_number": "24-CC-001736",
-      "address": "",
-      "surplus": 190515.08,
-      "sale_price": 200400.0,
-      "sale_date": "2026-04-30",
-      "score": "A+"
+      "case_number": "2017-CA-002998-O",
+      "address": "7866 BARDMOOR HILL CIR",
+      "surplus": 571191.0,
+      "apparent": 47572.05000000005,
+      "source": "propertyradar"
     },
     {
       "county": "Miami-Dade",
       "state": "FL",
       "case_number": "2024-004620-CA-01",
       "address": "6801 SW 84 AVE",
-      "surplus": 133174.06,
-      "sale_price": 576500.0,
-      "sale_date": "2026-05-05",
-      "score": "A+"
+      "surplus": 553254.0,
+      "apparent": 133174.06,
+      "source": "propertyradar"
+    },
+    {
+      "county": "Miami-Dade",
+      "state": "FL",
+      "case_number": "2017-021344-CA-01",
+      "address": "13857 SW 154 ST",
+      "surplus": 347060.0,
+      "apparent": 245919.85,
+      "source": "propertyradar"
     },
     {
       "county": "Miami-Dade",
       "state": "FL",
       "case_number": "2023-013018-CA-01",
       "address": "4240 NW 23 AVE",
-      "surplus": 128742.35999999999,
-      "sale_price": 285200.0,
-      "sale_date": "2026-05-05",
-      "score": "A+"
+      "surplus": 277041.0,
+      "apparent": 128742.35999999999,
+      "source": "propertyradar"
     }
   ],
   "coverage": {

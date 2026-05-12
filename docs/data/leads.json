@@ -52,8 +52,8 @@
     "debt_coverage_ratio": 0.20599405170441545,
     "is_clean_surplus": true,
     "enrichment_status": "matched",
-    "best_real_surplus": 245919.85,
-    "real_surplus_source": "docket"
+    "best_real_surplus": 347060.0,
+    "real_surplus_source": "propertyradar"
   },
   {
     "county_id": "broward-fl",

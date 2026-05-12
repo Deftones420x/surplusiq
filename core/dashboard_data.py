@@ -1,21 +1,25 @@
 """
-SurplusIQ — Dashboard Data Exporter (v4 — guard against loader's default true_surplus)
+SurplusIQ — Dashboard Data Exporter (v5 — bug fixes from live deploy)
+
+v5 fixes:
+  Bug 1 (KPI cards show apparent surplus, not refined):
+    • summary_payload.total_surplus now reflects best_real_surplus (was: gross_surplus)
+    • summary_payload.top_5_leads is now recomputed using best_real_surplus
+    • Original apparent surplus preserved as total_apparent_surplus
+
+  Bug 2 (Wilmington Trust mislabeled DOCKET despite Miami-Dade reCAPTCHA block):
+    • _compute_best_real_surplus now requires classification ∈ {green, yellow, red, killed}
+    • "unknown" classification no longer triggers docket source
+      (it indicates the scrape ran but produced no data, not docket-verified)
 
 Generates two JSON files that the dashboard HTML reads:
-
   docs/data/leads.json      — all qualifying leads, enriched with PR + docket data
   docs/data/summary.json    — county totals, score distribution, KPIs
 
-v4 fix:
-  • _compute_best_real_surplus now requires `classification` to be populated
-    before trusting `true_surplus` as docket-verified. This prevents
-    loader.py's default `true_surplus = gross_surplus` from masquerading
-    as docket-confirmed data on leads that never had a docket scraper run.
-
 Priority for best_real_surplus:
-  1. Docket-verified (classification populated AND true_surplus present)  → source = "docket"
-  2. PropertyRadar enriched (pr_match=True AND real_surplus_estimate)     → source = "propertyradar"
-  3. Apparent surplus (auction-only fallback)                             → source = "apparent"
+  1. Docket-verified (classification in {green/yellow/red/killed} AND true_surplus set)  → "docket"
+  2. PropertyRadar enriched (pr_match=True AND real_surplus_estimate)                    → "propertyradar"
+  3. Apparent surplus (auction-only fallback)                                            → "apparent"
 
 Usage:
     python -m core.dashboard_data
@@ -29,11 +33,13 @@ from pathlib import Path
 from core.loader import load_all_leads, get_summary, PROJECT_ROOT
 
 
+# Classifications that count as "docket-verified" — explicit allowlist.
+# "unknown" is excluded because it means the scrape ran but produced no usable data.
+DOCKET_VERIFIED_CLASSIFICATIONS = {"green", "yellow", "red", "killed"}
+
+
 def _load_pr_enrichment() -> dict:
-    """
-    Load the most recent PropertyRadar enrichment file and build a lookup
-    by (county_id, case_number).
-    """
+    """Load the most recent PropertyRadar enrichment file."""
     enriched_dir = PROJECT_ROOT / "data" / "enriched"
     if not enriched_dir.exists():
         return {}
@@ -89,21 +95,14 @@ def _apply_pr_to_payload(payload_lead: dict, pr_record: dict) -> dict:
 
 def _compute_best_real_surplus(payload_lead: dict) -> tuple:
     """
-    Pick the best available "real surplus" estimate and tag its source.
+    Pick best available "real surplus" estimate and tag its source.
 
-    v4 fix: docket source requires `classification` to be set (not just
-    a non-zero true_surplus, which loader.py sets by default).
-
-    Priority:
-      1. Docket-verified  (classification populated)        → "docket"
-      2. PR-enriched      (pr_match True + estimate set)    → "propertyradar"
-      3. Apparent surplus (auction-only fallback)           → "apparent"
-
-    Returns: (best_real_surplus_float, source_string)
+    v5: docket source requires classification ∈ {green, yellow, red, killed}.
+    "unknown" classification is excluded — means scrape ran but no data extracted.
     """
-    # Source 1: docket — ONLY if classification is populated by a docket scraper
-    classification = (payload_lead.get("classification") or "").strip()
-    if classification:
+    # Source 1: docket-verified — only if classification is in the explicit allowlist
+    classification = (payload_lead.get("classification") or "").strip().lower()
+    if classification in DOCKET_VERIFIED_CLASSIFICATIONS:
         docket_true_surplus = payload_lead.get("true_surplus", 0.0)
         if docket_true_surplus is not None:
             return (float(docket_true_surplus), "docket")
@@ -166,7 +165,6 @@ def export_dashboard_data():
             "additional_parties":     getattr(l, "additional_parties", []),
             "docket_url":             getattr(l, "docket_url", ""),
 
-            # PropertyRadar fields (populated below if matched)
             "pr_match": False,
         }
 
@@ -176,7 +174,8 @@ def export_dashboard_data():
             if payload.get("pr_match"):
                 pr_matches += 1
 
-        if payload.get("classification"):
+        # v5: only count as docket match if classification is in the allowlist
+        if (payload.get("classification") or "").strip().lower() in DOCKET_VERIFIED_CLASSIFICATIONS:
             docket_matches += 1
 
         best_real, source = _compute_best_real_surplus(payload)
@@ -193,18 +192,44 @@ def export_dashboard_data():
     print(f"   ✓ Enrichment coverage: {pr_matches} PR / {docket_matches} docket / {len(leads_payload)} total")
     print(f"   ✓ Total real surplus (best available): ${total_real_surplus:,.0f}")
 
+    # v5 Bug 1 fix: rebuild top_5_leads using best_real_surplus, not gross_surplus
+    sorted_by_real = sorted(
+        leads_payload,
+        key=lambda p: p.get("best_real_surplus", 0),
+        reverse=True,
+    )
+    top_5_leads_real = []
+    for p in sorted_by_real[:5]:
+        top_5_leads_real.append({
+            "county":      p.get("county_name", ""),
+            "state":       p.get("state", ""),
+            "case_number": p.get("case_number", ""),
+            "address":     p.get("address", ""),
+            "surplus":     p.get("best_real_surplus", 0),
+            "apparent":    p.get("gross_surplus", 0),
+            "source":      p.get("real_surplus_source", "apparent"),
+        })
+
     summary_file = docs_data / "summary.json"
     summary_payload = {
-        "generated_at":   summary["generated_at"],
-        "total_leads":    summary["total_leads"],
-        "total_surplus":  summary["total_surplus"],
-        "total_real_surplus":   total_real_surplus,
-        "pr_matched_count":     pr_matches,
-        "docket_matched_count": docket_matches,
-        "by_state":       summary["by_state"],
-        "by_county":      summary["by_county"],
-        "by_score":       summary["by_score"],
-        "top_5_leads":    summary["top_5_leads"],
+        "generated_at":           summary["generated_at"],
+        "total_leads":            summary["total_leads"],
+
+        # v5 Bug 1 fix: total_surplus headline number is now refined, not apparent
+        "total_surplus":          total_real_surplus,
+        "total_apparent_surplus": summary["total_surplus"],
+
+        "total_real_surplus":     total_real_surplus,
+        "pr_matched_count":       pr_matches,
+        "docket_matched_count":   docket_matches,
+
+        "by_state":  summary["by_state"],
+        "by_county": summary["by_county"],
+        "by_score":  summary["by_score"],
+
+        # v5 Bug 1 fix: top_5_leads now sorted by best_real_surplus
+        "top_5_leads": top_5_leads_real,
+
         "coverage": {
             "states":   ["FL", "OH"],
             "counties": [
@@ -225,6 +250,10 @@ def export_dashboard_data():
     with open(summary_file, "w") as f:
         json.dump(summary_payload, f, indent=2)
     print(f"   ✓ Wrote {summary_file.relative_to(PROJECT_ROOT)}")
+    print(f"   ✓ Headline KPI total_surplus = ${total_real_surplus:,.0f} (was apparent ${summary['total_surplus']:,.0f})")
+    if top_5_leads_real:
+        top = top_5_leads_real[0]
+        print(f"   ✓ Top lead = ${top['surplus']:,.0f} | {top['county']}, {top['state']} | {top['case_number']}")
 
     return leads_file, summary_file
 
